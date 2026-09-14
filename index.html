@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafios de Programação</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+        }
+
+        .campo {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #0d1117;
+            color: white;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .conteudos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .conteudo {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .conteudo label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        #resultado {
+            display: none;
+        }
+
+        .requisitos {
+            margin-top: 20px;
+            line-height: 2;
+        }
+
+        @media (max-width: 600px) {
+            .conteudos {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            main {
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Desafios de Programação</h1>
+    </header>
+
+    <main>
+
+        <div class="card">
+
+            <h2>Crie seu desafio</h2>
+
+            <div class="campo">
+                <label for="dificuldade">Dificuldade</label>
+
+                <select id="dificuldade">
+                    <option>Fácil</option>
+                    <option>Médio</option>
+                    <option>Difícil</option>
+                </select>
+            </div>
+
+            <div class="campo">
+
+                <label>Conteúdos</label>
+
+                <div class="conteudos">
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="Variáveis">
+                            Variáveis
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="If / Else">
+                            If / Else
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="For">
+                            For
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="While">
+                            While
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="Array">
+                            Array
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="String">
+                            String
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="Função">
+                            Função
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="Struct">
+                            Struct
+                        </label>
+                    </div>
+
+                    <div class="conteudo">
+                        <label>
+                            <input type="checkbox" value="Ponteiros">
+                            Ponteiros
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button onclick="gerarDesafio()">
+                GERAR DESAFIO
+            </button>
+
+        </div>
+
+
+        <div class="card" id="resultado">
+
+            <h2 id="tituloDesafio"></h2>
+
+            <p id="descricaoDesafio"></p>
+
+            <div class="requisitos">
+                <strong>Requisitos:</strong>
+
+                <ul id="listaRequisitos"></ul>
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        function gerarDesafio() {
+
+            const dificuldade =
+                document.getElementById("dificuldade").value;
+
+            const selecionados =
+                document.querySelectorAll(
+                    'input[type="checkbox"]:checked'
+                );
+
+            const conteudos = [];
+
+            selecionados.forEach(function(item) {
+                conteudos.push(item.value);
+            });
+
+
+            document.getElementById("resultado").style.display = "block";
+
+            document.getElementById("tituloDesafio").textContent =
+                "Desafio de C - " + dificuldade;
+
+
+            if (conteudos.length === 0) {
+
+                document.getElementById("descricaoDesafio").textContent =
+                    "Selecione pelo menos um conteúdo para gerar um desafio.";
+
+                document.getElementById("listaRequisitos").innerHTML = "";
+
+                return;
+            }
+
+
+            document.getElementById("descricaoDesafio").textContent =
+                "Crie um programa em C utilizando os conteúdos selecionados: "
+                + conteudos.join(", ") + ".";
+
+
+            const lista =
+                document.getElementById("listaRequisitos");
+
+            lista.innerHTML = "";
+
+
+            conteudos.forEach(function(conteudo) {
+
+                const item = document.createElement("li");
+
+                item.textContent =
+                    "Utilizar " + conteudo + " no programa.";
+
+                lista.appendChild(item);
+
+            });
+
+        }
+
+    </script>
+
+</body>
+</html>
