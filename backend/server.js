@@ -1,3 +1,4 @@
+```javascript
 const express = require("express");
 const cors = require("cors");
 
@@ -12,6 +13,8 @@ app.get("/", (req, res) => {
     });
 });
 
+
+// EXECUTAR CÓDIGO
 app.post("/executar", async (req, res) => {
     const codigo = req.body.codigo;
 
@@ -108,8 +111,97 @@ app.get("/testar-ia", async (req, res) => {
 });
 
 
+// GERAR DESAFIO
+app.post("/gerar-desafio", async (req, res) => {
+
+    const dificuldade = req.body.dificuldade;
+    const conteudos = req.body.conteudos;
+
+    if (!dificuldade || !conteudos || conteudos.length === 0) {
+        return res.status(400).json({
+            erro: "Informe a dificuldade e pelo menos um conteúdo."
+        });
+    }
+
+    const prompt = `
+Você é um professor de programação em C.
+
+Crie um desafio de programação em C.
+
+Dificuldade: ${dificuldade}
+
+Conteúdos obrigatórios:
+${conteudos.join(", ")}
+
+O desafio deve ser adequado para a dificuldade escolhida
+e deve exigir o uso dos conteúdos informados.
+
+Não forneça a solução do exercício.
+
+Organize a resposta com:
+
+Título:
+Descrição:
+Requisitos:
+Entrada:
+Saída:
+Observações:
+`;
+
+    try {
+
+        const resposta = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": process.env.GEMINI_API_KEY
+                },
+
+                body: JSON.stringify({
+                    model: "gemini-3.6-flash",
+                    input: prompt
+                })
+            }
+        );
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+            return res.status(resposta.status).json({
+                erro: "Erro na API Gemini.",
+                detalhes: resultado
+            });
+        }
+
+        const desafio =
+            resultado.steps
+                ?.filter(step => step.type === "model_output")
+                ?.flatMap(step => step.content || [])
+                ?.find(content => content.type === "text")
+                ?.text;
+
+        res.json({
+            sucesso: true,
+            desafio: desafio
+        });
+
+    } catch (erro) {
+
+        res.status(500).json({
+            erro: "Erro ao gerar desafio.",
+            detalhes: erro.message
+        });
+
+    }
+});
+
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`Servidor iniciado na porta ${PORT}`);
 });
+```
