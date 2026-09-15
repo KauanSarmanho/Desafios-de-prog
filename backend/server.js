@@ -10,6 +10,21 @@ app.get("/", (req, res) => {
     });
 });
 
+app.post("/executar", (req, res) => {
+    const codigo = req.body.codigo;
+
+    if (!codigo) {
+        return res.status(400).json({
+            erro: "Nenhum código foi enviado."
+        });
+    }
+
+    res.json({
+        mensagem: "Código recebido pelo backend!",
+        codigo: codigo
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
