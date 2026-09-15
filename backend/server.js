@@ -1,4 +1,4 @@
-```javascript
+javascript
 const express = require("express");
 const cors = require("cors");
 
@@ -13,8 +13,6 @@ app.get("/", (req, res) => {
     });
 });
 
-
-// EXECUTAR CÓDIGO
 app.post("/executar", async (req, res) => {
     const codigo = req.body.codigo;
 
@@ -55,8 +53,6 @@ app.post("/executar", async (req, res) => {
     }
 });
 
-
-// TESTE DA IA
 app.get("/testar-ia", async (req, res) => {
 
     try {
@@ -110,8 +106,6 @@ app.get("/testar-ia", async (req, res) => {
     }
 });
 
-
-// GERAR DESAFIO
 app.post("/gerar-desafio", async (req, res) => {
 
     const dificuldade = req.body.dificuldade;
@@ -198,10 +192,8 @@ Observações:
     }
 });
 
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`Servidor iniciado na porta ${PORT}`);
 });
-```
