@@ -52,6 +52,65 @@ app.post("/executar", async (req, res) => {
     }
 });
 
+
+// TESTE DA IA
+app.get("/testar-ia", async (req, res) => {
+
+    try {
+
+        const resposta = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": process.env.GEMINI_API_KEY
+                },
+
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: "Responda apenas: A conexão com a IA funcionou!"
+                                }
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+            return res.status(resposta.status).json({
+                erro: "Erro na API Gemini.",
+                detalhes: resultado
+            });
+        }
+
+        const texto =
+            resultado.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        res.json({
+            sucesso: true,
+            resposta: texto,
+            respostaCompleta: resultado
+        });
+
+    } catch (erro) {
+
+        res.status(500).json({
+            erro: "Erro ao conectar com a IA.",
+            detalhes: erro.message
+        });
+
+    }
+});
+
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
