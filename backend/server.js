@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
     });
 });
 
-app.post("/executar", (req, res) => {
+app.post("/executar", async (req, res) => {
     const codigo = req.body.codigo;
 
     if (!codigo) {
@@ -19,10 +19,35 @@ app.post("/executar", (req, res) => {
         });
     }
 
-    res.json({
-        mensagem: "Código recebido pelo backend!",
-        codigo: codigo
-    });
+    try {
+        const resposta = await fetch("https://api.onecompiler.com/v1/run", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-API-Key": process.env.ONECOMPILER_API_KEY
+            },
+            body: JSON.stringify({
+                language: "c",
+                stdin: "",
+                files: [
+                    {
+                        name: "main.c",
+                        content: codigo
+                    }
+                ]
+            })
+        });
+
+        const resultado = await resposta.json();
+
+        res.json(resultado);
+
+    } catch (erro) {
+        res.status(500).json({
+            erro: "Erro ao executar o código.",
+            detalhes: erro.message
+        });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
