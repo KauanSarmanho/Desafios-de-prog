@@ -59,7 +59,7 @@ app.get("/testar-ia", async (req, res) => {
     try {
 
         const resposta = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
             {
                 method: "POST",
 
@@ -69,15 +69,8 @@ app.get("/testar-ia", async (req, res) => {
                 },
 
                 body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: "Responda apenas: A conexão com a IA funcionou!"
-                                }
-                            ]
-                        }
-                    ]
+                    model: "gemini-3.6-flash",
+                    input: "Responda apenas: A conexão com a IA funcionou!"
                 })
             }
         );
@@ -92,7 +85,11 @@ app.get("/testar-ia", async (req, res) => {
         }
 
         const texto =
-            resultado.candidates?.[0]?.content?.parts?.[0]?.text;
+            resultado.steps
+                ?.filter(step => step.type === "model_output")
+                ?.flatMap(step => step.content || [])
+                ?.find(content => content.type === "text")
+                ?.text;
 
         res.json({
             sucesso: true,
