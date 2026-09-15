@@ -117,28 +117,41 @@ app.post("/gerar-desafio", async (req, res) => {
     }
 
     const prompt = `
-Você é um professor de programação em C.
+Você é um gerador de desafios de programação em C.
 
-Crie um desafio de programação em C.
+Gere UM único desafio de programação.
 
 Dificuldade: ${dificuldade}
 
 Conteúdos obrigatórios:
 ${conteudos.join(", ")}
 
-O desafio deve ser adequado para a dificuldade escolhida
-e deve exigir o uso dos conteúdos informados.
+REGRAS:
+- O desafio deve realmente exigir o uso de todos os conteúdos informados.
+- Não forneça código.
+- Não forneça solução.
+- Não forneça dicas de implementação.
+- Não explique como resolver.
+- Não faça introduções ou despedidas.
+- Seja direto e conciso.
+- O desafio deve ser adequado ao nível de dificuldade informado.
 
-Não forneça a solução do exercício.
-
-Organize a resposta com:
+Use EXATAMENTE este formato:
 
 Título:
+[Nome do desafio]
+
 Descrição:
+[Descrição curta do problema]
+
 Requisitos:
+[Lista objetiva do que o programa deve fazer]
+
 Entrada:
+[O que o usuário deverá informar]
+
 Saída:
-Observações:
+[O que o programa deverá exibir]
 `;
 
     try {
