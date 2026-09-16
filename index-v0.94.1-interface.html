@@ -1,0 +1,2717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Desafios de Programação em C</title>
+
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        :root {
+            --bg-page: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --border-color: #30363d;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --accent-green: #238636;
+            --accent-green-hover: #2ea043;
+            --accent-blue: #58a6ff;
+            --badge-easy: #238636;
+            --badge-medium: #d29922;
+            --badge-hard: #f85149;
+            --terminal-bg: #090d13;
+            --font-mono: 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* CABEÇALHO GLOBAL */
+        header.app-header {
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* MENU RETRÁTIL */
+        .menu-retratil {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 48px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+            z-index: 90;
+            transition: width 0.2s ease;
+        }
+
+        .menu-retratil.aberta {
+            width: 285px;
+        }
+
+        .btn-menu-retratil {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .btn-menu-retratil:hover,
+        .btn-menu-retratil.aberta {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .seta-menu {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            position: relative;
+            color: var(--text-muted);
+            transform: rotate(90deg);
+            transform-origin: center center;
+            transition: transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .seta-menu::before {
+            content: "";
+            position: absolute;
+            top: 3.5px;
+            left: 3.5px;
+            width: 7px;
+            height: 7px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transform-origin: center center;
+        }
+
+        .btn-menu-retratil.aberta .seta-menu {
+            transform: rotate(-90deg);
+        }
+
+        .painel-menu-retratil {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px 8px;
+            padding-right: 52px;
+            background: var(--bg-elevated);
+            overflow-y: auto;
+            scrollbar-width: none;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+            z-index: 1;
+        }
+
+        .painel-menu-retratil::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu-retratil.aberta .painel-menu-retratil {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        .menu-item-concluidos {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .menu-item-concluidos:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            background: var(--accent-blue);
+            color: #0d1117;
+            font-weight: 900;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        header.app-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* ABA DE DESAFIOS SALVOS */
+        .desafios-container {
+            position: relative;
+            margin-left: 0;
+            flex-shrink: 0;
+        }
+
+        .painel-menu-retratil .desafios-container {
+            width: 100%;
+        }
+
+        .painel-menu-retratil .btn-desafios {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .btn-desafios {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 32px;
+            padding: 5px 9px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-desafios:hover,
+        .btn-desafios.aberta {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--border-color);
+        }
+
+        .seta-giro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            flex: 0 0 14px;
+            position: relative;
+            color: var(--text-muted);
+            transform: rotate(0deg);
+            transform-origin: center center;
+            transition: transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .seta-giro::before {
+            content: "";
+            position: absolute;
+            top: 3.5px;
+            left: 3.5px;
+            width: 7px;
+            height: 7px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transform-origin: center center;
+        }
+
+        /* Seta de DESAFIOS: sobe levemente, mantendo a mesma aparência e rotação. */
+        .btn-desafios .seta-giro {
+            top: -2px;
+        }
+
+        .btn-desafios.aberta .seta-giro,
+        .select-dificuldade.aberta .seta-giro {
+            transform: rotate(180deg);
+        }
+
+        .lista-desafios {
+            display: none;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .desafios-container.aberta .lista-desafios {
+            display: block;
+        }
+
+        .desafio-salvo-vazio {
+            padding: 12px 10px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .desafio-salvo-item {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .desafio-salvo-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        /* Ajuste da seta do campo de dificuldade: mesmo elemento e mesma rotação da aba */
+        .select-dificuldade select {
+            padding-right: 44px;
+        }
+
+        .select-dificuldade .seta-giro {
+            position: absolute;
+            top: calc(50% - 7px);
+            right: 14px;
+            transform: rotate(0deg);
+            transform-origin: center center;
+            z-index: 2;
+        }
+
+        .select-dificuldade.aberta .seta-giro {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 700px) {
+            .btn-desafios {
+                padding-left: 7px;
+                padding-right: 7px;
+            }
+
+            .menu-retratil {
+                width: 48px;
+            }
+
+            .menu-retratil.aberta {
+                width: min(285px, 100vw);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .lista-desafios {
+                left: -4px;
+                width: min(320px, calc(100vw - 28px));
+            }
+
+            /* No celular, quando fechado, o menu mostra somente a seta. */
+            .menu-retratil {
+                width: 36px;
+                background: transparent;
+                border-right: 0;
+            }
+
+            .menu-retratil:not(.aberta) .btn-menu-retratil {
+                right: 4px;
+                width: 28px;
+                height: 32px;
+                border: 0;
+                background: transparent;
+            }
+
+            .menu-retratil.aberta {
+                width: min(285px, 100vw);
+                background: var(--bg-card);
+                border-right: 1px solid var(--border-color);
+            }
+
+            /* A seta fechada fica sobre a lateral sem reservar espaço no conteúdo. */
+            main {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+                box-sizing: border-box;
+            }
+        }
+
+        /* BOTÃO E JANELA DE AJUDA */
+        .ajuda-container {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .btn-ajuda {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border: 1px solid #ffffff;
+            border-radius: 50%;
+            background: transparent;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .btn-ajuda:hover,
+        .btn-ajuda.aberta {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .janela-ajuda {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: min(340px, calc(100vw - 32px));
+            max-height: min(520px, calc(100vh - 90px));
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            font-size: 13px;
+            line-height: 1.45;
+            z-index: 110;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+        }
+
+        .janela-ajuda h3 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .janela-ajuda p {
+            margin: 0 0 10px;
+        }
+
+        .janela-ajuda p:last-child {
+            margin-bottom: 0;
+        }
+
+        .janela-ajuda strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .ajuda-container:hover .janela-ajuda,
+        .ajuda-container .janela-ajuda.aberta {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* SETA DO CAMPO DE DIFICULDADE */
+        .select-dificuldade {
+            position: relative;
+        }
+
+        .select-dificuldade select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 42px;
+        }
+
+        @media (max-width: 600px) {
+            .janela-ajuda {
+                right: -4px;
+                width: min(320px, calc(100vw - 28px));
+            }
+        }
+
+        main {
+            max-width: 850px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 16px;
+            flex: 1;
+        }
+
+        /* TELAS */
+        .tela {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .tela.ativa {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARTÕES */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        .campo {
+            margin-bottom: 22px;
+        }
+
+        label.titulo-campo {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-page);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* GRADE DE CONTEÚDOS */
+        .conteudos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .conteudo {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            transition: border-color 0.2s, background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .conteudo:hover {
+            border-color: var(--accent-blue);
+            background: #131b26;
+        }
+
+        .conteudo label {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .conteudo input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        /* BOTÕES GERAIS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.99);
+        }
+
+        .btn-primario {
+            background: var(--accent-green);
+            color: #ffffff;
+        }
+
+        .btn-primario:hover {
+            background: var(--accent-green-hover);
+        }
+
+        .btn-secundario {
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secundario:hover {
+            background: #2a313c;
+            border-color: #484f58;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 0;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+
+        /* MENSAGEM DE AVISO */
+        .alerta-erro {
+            display: none;
+            background: #3b181b;
+            color: #ff7b72;
+            border: 1px solid #672027;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        /* BADGES */
+        .badge-grupo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 18px 0;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-dificuldade-facil {
+            background: rgba(35, 134, 54, 0.2);
+            color: #3fb950;
+            border: 1px solid rgba(63, 185, 80, 0.4);
+        }
+
+        .badge-dificuldade-medio {
+            background: rgba(210, 153, 34, 0.2);
+            color: #e3b341;
+            border: 1px solid rgba(227, 179, 65, 0.4);
+        }
+
+        .badge-dificuldade-dificil {
+            background: rgba(248, 81, 73, 0.2);
+            color: #f85149;
+            border: 1px solid rgba(248, 81, 73, 0.4);
+        }
+
+        .badge-topico {
+            background: var(--bg-elevated);
+            color: var(--accent-blue);
+            border: 1px solid var(--border-color);
+        }
+
+        /* SEÇÃO DE DETALHES DO DESAFIO (TELA 2) */
+        .secao-info {
+            margin-bottom: 20px;
+        }
+
+        .secao-info h3 {
+            font-size: 15px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .descricao-texto {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .lista-requisitos {
+            list-style: none;
+            padding-left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lista-requisitos li {
+            padding: 10px 14px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .lista-requisitos li::before {
+            content: "✓";
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .bloco-exemplo {
+            background: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: #7ee787;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .acoes-desafio {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        /* TELA 3: PROGRAMAÇÃO (MOBILE-FIRST) */
+        #tela-programacao {
+            padding-bottom: 20px;
+        }
+
+        .prog-topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .prog-titulo-desafio {
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+
+        /* CONTROLE DE ABAS (DESAFIO / CÓDIGO) */
+        .abas-controle {
+            display: flex;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        .aba-btn {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .aba-btn.ativa {
+            background: var(--bg-card);
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .dica-swipe {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* CONTAINER DESLIZÁVEL (SWIPE NATIVO) */
+        .swipe-wrapper {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .swipe-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome, Safari */
+        }
+
+        .swipe-panel {
+            flex: 0 0 100%;
+            width: 100%;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        /* CONTEÚDO DO PAINEL DE CÓDIGO */
+        .editor-header {
+            background: #181d24;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-arquivo {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-reset:hover {
+            color: var(--text-main);
+            background: var(--bg-elevated);
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 280px;
+            background: #0f1319;
+            color: #f0f6fc;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            resize: vertical;
+            outline: none;
+            tab-size: 4;
+            white-space: pre;
+        }
+
+        .editor-textarea:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .editor-toolbar {
+            background: #181d24;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+
+        .btn-executar {
+            background: var(--accent-green);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 18px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-executar:hover {
+            background: var(--accent-green-hover);
+        }
+
+        .btn-executar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* CONSOLE TERMINAL */
+        .terminal-container {
+            background: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: #141920;
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3fb950;
+        }
+
+        .status-dot.compilando {
+            background: #e3b341;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .terminal-corpo {
+            padding: 14px;
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1d5da;
+            white-space: pre-wrap;
+        }
+
+        /* RESPONSIVIDADE ADICIONAL */
+        @media (min-width: 601px) {
+            .acoes-desafio {
+                flex-direction: row;
+            }
+
+            .acoes-desafio .btn {
+                width: auto;
+                flex: 1;
+            }
+
+            .editor-textarea {
+                height: 320px;
+            }
+        }
+
+        /* LOGIN / CONTA — ETAPA VISUAL (SEM SUPABASE) */
+        .acoes-conta-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            position: relative;
+        }
+
+        .conta-container {
+            position: relative;
+        }
+
+        .btn-conta {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+
+        .btn-conta:hover,
+        .btn-conta.aberta {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-muted);
+        }
+
+        .icone-conta {
+            width: 17px;
+            height: 17px;
+            position: relative;
+            display: block;
+        }
+
+        .icone-conta::before {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border: 1.5px solid currentColor;
+            border-radius: 50%;
+            top: 0;
+            left: 4px;
+        }
+
+        .icone-conta::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 6px;
+            border: 1.5px solid currentColor;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            bottom: 0;
+            left: 1.5px;
+        }
+
+        .menu-conta {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 190px;
+            padding: 6px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+            z-index: 220;
+        }
+
+        .conta-container.aberta .menu-conta {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .item-menu-conta {
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .item-menu-conta:hover {
+            background: rgba(255,255,255,0.07);
+        }
+
+        .modal-conta-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.62);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, visibility 0.18s ease;
+            z-index: 500;
+        }
+
+        .modal-conta-overlay.aberta {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .modal-conta {
+            width: min(390px, 100%);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 16px 45px rgba(0,0,0,0.45);
+            position: relative;
+        }
+
+        .modal-conta h2 {
+            margin: 0 0 20px;
+            font-size: 20px;
+        }
+
+        .fechar-modal-conta {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 30px;
+            height: 30px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .fechar-modal-conta:hover {
+            background: rgba(255,255,255,0.07);
+            color: var(--text-main);
+        }
+
+        .campo-conta-modal {
+            margin-bottom: 14px;
+        }
+
+        .campo-conta-modal label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .campo-conta-modal input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: #0f1319;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .campo-conta-modal input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-conta-principal {
+            width: 100%;
+            padding: 11px 14px;
+            border: 0;
+            border-radius: 7px;
+            background: var(--accent-blue);
+            color: #0d1117;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .link-conta {
+            border: 0;
+            background: transparent;
+            color: var(--accent-blue);
+            padding: 0;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .texto-conta-secundario {
+            margin: 14px 0 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .link-esqueceu {
+            display: block;
+            margin: 12px auto 0;
+            font-size: 13px;
+        }
+
+        .modal-conta-secundario {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .estado-conta-falso {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .acoes-conta-header {
+                gap: 8px;
+            }
+
+            .btn-ajuda,
+            .btn-conta {
+                width: 30px;
+                height: 30px;
+            }
+
+            .modal-conta {
+                padding: 22px 18px;
+            }
+        }
+
+        /* Ícone para mostrar/ocultar senha */
+        .campo-senha { position: relative; }
+        .campo-senha input { padding-right: 44px; }
+        .btn-olho-senha {
+            position: absolute; right: 10px; bottom: 9px; width: 30px; height: 30px;
+            border: 0; background: transparent; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 0; border-radius: 6px;
+        }
+        .btn-olho-senha:hover { color: var(--text-main); }
+        .btn-olho-senha svg { width: 19px; height: 19px; display: block; }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="brand">
+            <span class="brand-icon">C</span>
+            <h1>Desafios de Programação</h1>
+        </div>
+
+        <div class="acoes-conta-header">
+            <div class="ajuda-container">
+                <button
+                    id="btnAjuda"
+                    class="btn-ajuda"
+                    type="button"
+                    aria-label="Abrir ajuda"
+                    aria-expanded="false"
+                    aria-controls="janelaAjuda"
+                >?</button>
+
+                <div id="janelaAjuda" class="janela-ajuda" role="tooltip">
+                <h3>Como funciona o site?</h3>
+
+                <p><strong>1. Escolha a dificuldade</strong>
+                Selecione o nível do desafio que deseja fazer.</p>
+
+                <p><strong>2. Escolha os conteúdos</strong>
+                Selecione os conteúdos de programação em C que você quer praticar.</p>
+
+                <p><strong>3. Gere o desafio</strong>
+                Clique em "Gerar Desafio". A IA criará um desafio de acordo com a dificuldade e os conteúdos selecionados.</p>
+
+                <p><strong>4. Resolva o desafio</strong>
+                Leia os requisitos e escreva sua solução em C no editor de código.</p>
+
+                <p><strong>5. Execute seu código</strong>
+                Use o botão de executar para compilar e testar seu programa.</p>
+
+                <p><strong>Dica:</strong> Leia todos os requisitos do desafio antes de começar a programar.</p>
+                </div>
+            </div>
+
+            <div id="contaContainer" class="conta-container">
+                <button id="btnConta" class="btn-conta" type="button" aria-label="Conta do usuário" aria-expanded="false" aria-controls="menuConta">
+                    <span class="icone-conta" aria-hidden="true"></span>
+                </button>
+
+                <div id="menuConta" class="menu-conta" role="menu">
+                    <button id="btnFazerLogin" class="item-menu-conta" type="button">Fazer login</button>
+                    <div class="estado-conta-falso">
+                        <button class="item-menu-conta" type="button">Informações da conta</button>
+                        <button class="item-menu-conta" type="button">Encerrar sessão</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="modalContaOverlay" class="modal-conta-overlay" aria-hidden="true">
+        <div class="modal-conta" role="dialog" aria-modal="true" aria-labelledby="tituloModalConta">
+            <button id="fecharModalConta" class="fechar-modal-conta" type="button" aria-label="Fechar">×</button>
+
+            <div id="telaLoginConta">
+                <h2 id="tituloModalConta">Entrar</h2>
+                <div class="campo-conta-modal">
+                    <label for="loginEmailVisual">E-mail</label>
+                    <input id="loginEmailVisual" type="email" placeholder="seu@email.com">
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="loginSenhaVisual">Senha</label>
+                    <input id="loginSenhaVisual" type="password" placeholder="Sua senha">
+                    <button class="btn-olho-senha" type="button" data-target="loginSenhaVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <button class="btn-conta-principal" type="button">Entrar</button>
+                <button id="btnEsqueciSenha" class="link-conta link-esqueceu" type="button">Esqueci minha senha</button>
+
+                <p class="texto-conta-secundario">
+                    Ainda não tem uma conta?
+                    <button id="btnMostrarCadastro" class="link-conta" type="button">Cadastre-se</button>
+                </p>
+            </div>
+
+            <div id="telaCadastroConta" style="display:none;">
+                <h2>Criar conta</h2>
+                <div class="campo-conta-modal">
+                    <label for="cadastroNomeUsuarioVisual">Nome de usuário</label>
+                    <input id="cadastroNomeUsuarioVisual" type="text" placeholder="Escolha um nome de usuário" autocomplete="username">
+                </div>
+                <div class="campo-conta-modal">
+                    <label for="cadastroEmailVisual">E-mail</label>
+                    <input id="cadastroEmailVisual" type="email" placeholder="seu@email.com">
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="cadastroSenhaVisual">Senha</label>
+                    <input id="cadastroSenhaVisual" type="password" placeholder="Crie uma senha">
+                    <button class="btn-olho-senha" type="button" data-target="cadastroSenhaVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="cadastroConfirmacaoVisual">Confirmar senha</label>
+                    <input id="cadastroConfirmacaoVisual" type="password" placeholder="Repita a senha">
+                    <button class="btn-olho-senha" type="button" data-target="cadastroConfirmacaoVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <button class="btn-conta-principal" type="button">Cadastrar</button>
+                <p class="texto-conta-secundario">
+                    Já possui uma conta?
+                    <button id="btnVoltarLogin" class="link-conta" type="button">Entrar</button>
+                </p>
+            </div>
+
+            <div id="telaRecuperacaoConta" style="display:none;">
+                <h2>Recuperar senha</h2>
+                <div class="campo-conta-modal">
+                    <label for="recuperacaoEmailVisual">E-mail</label>
+                    <input id="recuperacaoEmailVisual" type="email" placeholder="seu@email.com">
+                </div>
+                <button class="btn-conta-principal" type="button">Enviar e-mail de recuperação</button>
+                <p class="texto-conta-secundario">
+                    <button id="btnVoltarLoginRecuperacao" class="link-conta" type="button">Voltar para o login</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+        <div id="menuRetratil" class="menu-retratil">
+            <button
+                id="btnMenuRetratil"
+                class="btn-menu-retratil"
+                type="button"
+                aria-label="Abrir menu"
+                aria-expanded="false"
+                aria-controls="painelMenuRetratil"
+            >
+                <span class="seta-menu" aria-hidden="true"></span>
+            </button>
+
+            <div id="painelMenuRetratil" class="painel-menu-retratil">
+                <div id="desafiosContainer" class="desafios-container">
+                    <button
+                        id="btnDesafios"
+                        class="btn-desafios"
+                        type="button"
+                        aria-label="Mostrar desafios em andamento"
+                        aria-expanded="false"
+                        aria-controls="listaDesafios"
+                    >
+                        DESAFIOS
+                        <span class="seta-giro" aria-hidden="true"></span>
+                    </button>
+
+                    <div id="listaDesafios" class="lista-desafios" role="menu">
+                        <div class="desafio-salvo-vazio">Nenhum desafio em andamento salvo.</div>
+                    </div>
+                </div>
+
+                <button class="menu-item-concluidos" type="button">DESAFIOS CONCLUÍDOS</button>
+            </div>
+        </div>
+
+
+    <main>
+
+        <!-- ========================================== -->
+        <!-- 1. TELA "CRIAR DESAFIO"                    -->
+        <!-- ========================================== -->
+        <section id="tela-criar" class="tela ativa">
+
+            <div class="card">
+                <h2>Crie seu desafio</h2>
+
+                <div id="alerta-selecao" class="alerta-erro">
+                    Por favor, selecione pelo menos um conteúdo para gerar o desafio.
+                </div>
+
+                <div class="campo">
+                    <label class="titulo-campo" for="dificuldade">Dificuldade</label>
+                    <div class="select-dificuldade" id="selectDificuldadeWrapper">
+                        <select id="dificuldade">
+                            <option value="Fácil">Fácil</option>
+                            <option value="Médio">Médio</option>
+                            <option value="Difícil">Difícil</option>
+                        </select>
+                        <span class="seta-giro" aria-hidden="true"></span>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label class="titulo-campo">Conteúdos</label>
+                    <div class="conteudos">
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Variáveis" checked>
+                                Variáveis
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="If / Else" checked>
+                                If / Else
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="For">
+                                For
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="While">
+                                While
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Array">
+                                Array
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="String">
+                                String
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Função">
+                                Função
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Struct">
+                                Struct
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Ponteiros">
+                                Ponteiros
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button class="btn btn-primario" onclick="gerarDesafio()">
+                    GERAR DESAFIO
+                </button>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- 2. TELA "DESAFIO" (DETALHES)               -->
+        <!-- ========================================== -->
+        <section id="tela-desafio" class="tela">
+
+            <button class="btn-link" onclick="navegarPara('tela-criar')">
+                ← Alterar opções do desafio
+            </button>
+
+            <div class="card">
+                <h2 id="desafio-titulo">Título do Desafio</h2>
+
+                <div class="badge-grupo">
+                    <span id="desafio-badge-dificuldade" class="badge badge-dificuldade-facil">Fácil</span>
+                    <div id="desafio-badges-conteudo" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                </div>
+
+                <div class="secao-info">
+                    <h3>Descrição</h3>
+                    <p id="desafio-descricao" class="descricao-texto"></p>
+                </div>
+
+                <div class="secao-info">
+                    <h3>Requisitos Obrigatórios</h3>
+                    <ul id="desafio-requisitos" class="lista-requisitos"></ul>
+                </div>
+
+                <div class="secao-info" id="secao-exemplo" style="display: none;">
+                    <h3>Exemplo de Saída Esperada</h3>
+                    <div id="desafio-exemplo" class="bloco-exemplo"></div>
+                </div>
+
+                <div class="acoes-desafio">
+                    <button class="btn btn-primario" onclick="comecarDesafio()">
+                        COMEÇAR DESAFIO →
+                    </button>
+                    <button class="btn btn-secundario" onclick="navegarPara('tela-criar')">
+                        Voltar
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- 3. TELA "PROGRAMAÇÃO" (ABAS + SWIPE)       -->
+        <!-- ========================================== -->
+        <section id="tela-programacao" class="tela">
+
+            <div class="prog-topo">
+                <button class="btn-link" onclick="navegarPara('tela-desafio')" style="margin-bottom: 0;">
+                    ← Voltar ao Desafio
+                </button>
+                <div id="prog-titulo-resumo" class="prog-titulo-desafio"></div>
+            </div>
+
+            <!-- CONTROLE DE ABAS -->
+            <div class="abas-controle">
+                <button id="btn-aba-desafio" class="aba-btn" onclick="trocarAba(0)">
+                    📋 DESAFIO
+                </button>
+                <button id="btn-aba-codigo" class="aba-btn ativa" onclick="trocarAba(1)">
+                    💻 CÓDIGO
+                </button>
+            </div>
+
+            <span class="dica-swipe">💡 No celular, você pode deslizar para os lados para alternar entre as abas</span>
+
+            <!-- ÁREA DESLIZÁVEL HORIZONTALMENTE (SWIPE) -->
+            <div id="swipeContainer" class="swipe-wrapper">
+
+                <!-- ABA 1: VISUALIZAÇÃO DO DESAFIO -->
+                <div class="swipe-panel" id="panel-desafio">
+                    <div class="card">
+                        <h2 id="prog-painel-titulo">Título</h2>
+                        
+                        <div class="badge-grupo">
+                            <span id="prog-painel-dificuldade" class="badge badge-dificuldade-facil">Fácil</span>
+                            <div id="prog-painel-badges" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                        </div>
+
+                        <div class="secao-info">
+                            <h3>Descrição</h3>
+                            <p id="prog-painel-descricao" class="descricao-texto"></p>
+                        </div>
+
+                        <div class="secao-info">
+                            <h3>Requisitos</h3>
+                            <ul id="prog-painel-requisitos" class="lista-requisitos"></ul>
+                        </div>
+
+                        <button class="btn btn-secundario" onclick="trocarAba(1)" style="margin-top: 10px;">
+                            Ir para o Editor de Código →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA 2: EDITOR DE CÓDIGO + TERMINAL -->
+                <div class="swipe-panel" id="panel-codigo">
+                    
+                    <div class="editor-header">
+                        <span class="editor-arquivo">📄 main.c</span>
+                        <button class="btn-reset" onclick="resetarCodigo()" title="Restaurar código inicial">↺ Resetar Código</button>
+                    </div>
+
+                    <textarea id="editorCodigo" class="editor-textarea" spellcheck="false" placeholder="Escreva seu código em C aqui..."></textarea>
+
+                    <div class="editor-toolbar">
+                        <button id="btnExecutar" class="btn-executar" onclick="executarCodigoSimulado()">
+                            ▶ EXECUTAR
+                        </button>
+                    </div>
+
+                    <div class="terminal-container">
+                        <div class="terminal-header">
+                            <span>TERMINAL DE SAÍDA</span>
+                            <div class="terminal-status">
+                                <span id="statusDot" class="status-dot"></span>
+                                <span id="statusTexto">Pronto</span>
+                            </div>
+                        </div>
+                        <pre id="terminalSaida" class="terminal-corpo">> Clique em "EXECUTAR" para compilar e executar o código C.</pre>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // REQUISITOS PADRÃO POR CONCEITO (UTILIZADOS NOS DESAFIOS E NO FALLBACK)
+        // =========================================================================
+        const REQUISITOS_CONCEITOS = {
+            "Variáveis": "Declarar e inicializar variáveis com tipos de dados adequados (ex.: int, float ou char).",
+            "If / Else": "Implementar controle de fluxo com estrutura condicional if / else.",
+            "For": "Utilizar laço de repetição for para iterar sobre os dados.",
+            "While": "Utilizar estrutura de repetição while com condição de parada explícita.",
+            "Array": "Declarar e manipular um vetor (array) para armazenamento sequencial de dados.",
+            "String": "Manipular cadeia de caracteres (vetor de char com terminador '\\0').",
+            "Função": "Criar e invocar ao menos uma função modularizada dedicada além da main().",
+            "Struct": "Definir e instanciar uma estrutura (struct) para agrupar campos relacionados.",
+            "Ponteiros": "Utilizar ponteiros para manipulação direta de endereços de memória (* e &)."
+        };
+
+        // =========================================================================
+        // BANCO DE DESAFIOS PRONTOS (ESTRUTURA COMPATÍVEL COM IA)
+        // Cada desafio possui: dificuldade, conteudos, titulo, descricao, requisitos, saidaEsperada
+        // =========================================================================
+        const BANCO_DESAFIOS = [
+            // --- CONTEÚDOS INDIVIDUAIS ---
+            {
+                conteudos: ["Struct"],
+                dificuldade: "Médio",
+                titulo: "Modelagem de Registro com Struct",
+                descricao: "Crie um programa em C que declare uma estrutura (struct) para representar uma entidade com ao menos dois campos (por exemplo, Produto com código e preço, ou Ponto com x e y), instancie uma variável dessa struct e exiba seus dados no console.",
+                requisitos: [
+                    "Definir uma struct com campos apropriados.",
+                    "Declarar uma variável dessa struct e preencher seus campos.",
+                    "Exibir os valores dos campos formatados usando printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Registro criado com sucesso:\nCampo 1: 101\nCampo 2: 49.90"
+            },
+            {
+                conteudos: ["Ponteiros"],
+                dificuldade: "Médio",
+                titulo: "Manipulação Direta de Memória com Ponteiro",
+                descricao: "Desenvolva um programa em C que declare uma variável inteira e um ponteiro apontando para ela. Modifique o valor da variável utilizando o operador de desreferenciação (*) e exiba os valores antes e depois da alteração.",
+                requisitos: [
+                    "Declarar uma variável inteira e um ponteiro int*.",
+                    "Atribuir o endereço da variável ao ponteiro com o operador &.",
+                    "Modificar o valor da variável através do ponteiro (*ptr = novo_valor).",
+                    "Exibir o valor antes e depois da modificação com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Valor original: 10\nValor alterado via ponteiro: 99"
+            },
+            {
+                conteudos: ["Variáveis"],
+                dificuldade: "Fácil",
+                titulo: "Cálculo e Manipulação de Variáveis",
+                descricao: "Escreva um programa em C que declare variáveis de tipos primitivos, realize uma operação de cálculo e exiba o resultado no console.",
+                requisitos: [
+                    "Declarar variáveis numéricas com tipos adequados.",
+                    "Realizar um cálculo entre as variáveis.",
+                    "Exibir os valores e o resultado formatados usando printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Valor 1: 15\nValor 2: 25\nResultado da soma: 40"
+            },
+            {
+                conteudos: ["If / Else"],
+                dificuldade: "Fácil",
+                titulo: "Tomada de Decisão com If / Else",
+                descricao: "Implemente um programa em C que avalie uma condição numérica e determine qual ramo da estrutura condicional será executado.",
+                requisitos: [
+                    "Definir a condição a ser validada.",
+                    "Utilizar estrutura if / else para direcionar a execução.",
+                    "Exibir mensagem clara sobre a decisão tomada usando printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Condicao verificada com sucesso: ramo correspondente executado."
+            },
+            {
+                conteudos: ["For"],
+                dificuldade: "Fácil",
+                titulo: "Contador com Laço For",
+                descricao: "Crie um programa em C que utilize o laço de repetição 'for' para realizar uma contagem sequencial e exibir cada iteração no console.",
+                requisitos: [
+                    "Configurar inicialização, condição e incremento do laço for.",
+                    "Imprimir o valor de cada iteração com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Iteracao 1\nIteracao 2\nIteracao 3\nLaco finalizado com sucesso!"
+            },
+            {
+                conteudos: ["While"],
+                dificuldade: "Fácil",
+                titulo: "Controle de Repetição com While",
+                descricao: "Desenvolva um programa em C que execute uma repetição controlada pela estrutura 'while' até que uma condição de parada seja atingida.",
+                requisitos: [
+                    "Inicializar uma variável de controle de ciclo.",
+                    "Utilizar a estrutura while atualizando a condição a cada volta.",
+                    "Exibir o progresso e mensagem de encerramento com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Executando laco while...\nCondicao atingida, processo finalizado!"
+            },
+            {
+                conteudos: ["Array"],
+                dificuldade: "Médio",
+                titulo: "Armazenamento e Acesso em Vetor",
+                descricao: "Implemente um programa em C que declare um array com elementos numéricos e acesse posições específicas do vetor para exibir seus valores.",
+                requisitos: [
+                    "Declarar um vetor com tipo e tamanho definidos.",
+                    "Inicializar os elementos do vetor.",
+                    "Acessar os elementos por seus índices e imprimi-los com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Indice 0: 10\nIndice 1: 20\nIndice 2: 30"
+            },
+            {
+                conteudos: ["String"],
+                dificuldade: "Médio",
+                titulo: "Manipulação de String em C",
+                descricao: "Crie um programa em C que declare uma cadeia de caracteres (string terminada em '\\0') e exiba o texto formatado no console.",
+                requisitos: [
+                    "Declarar uma string como vetor de char.",
+                    "Armazenar um texto com terminador nulo.",
+                    "Exibir o texto utilizando printf() com especificador %s.",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Texto armazenado: \"Desafios de Programacao em C\""
+            },
+            {
+                conteudos: ["Função"],
+                dificuldade: "Médio",
+                titulo: "Modularização com Função Dedicada",
+                descricao: "Desenvolva um programa em C modularizado contendo uma função dedicada além da main(), realizando a chamada dessa função e exibindo o resultado obtido.",
+                requisitos: [
+                    "Declarar e implementar uma função com retorno e parâmetros adequados.",
+                    "Invocar a função a partir da main().",
+                    "Exibir o resultado retornado com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Funcao executada com sucesso!\nValor retornado: 100"
+            },
+
+            // --- COMBINAÇÕES DE DOIS OU MAIS CONTEÚDOS ---
+            {
+                conteudos: ["Struct", "Ponteiros"],
+                dificuldade: "Difícil",
+                titulo: "Manipulação de Struct via Ponteiro",
+                descricao: "Implemente um programa em C que defina uma struct e utilize um ponteiro para essa estrutura para preencher e exibir os valores de seus campos (usando o operador -> ou (*ptr).campo).",
+                requisitos: [
+                    "Definir uma struct com pelo menos dois campos de dados.",
+                    "Declarar uma variável da struct e um ponteiro apontando para o endereço dela.",
+                    "Acessar e preencher os campos da struct através do ponteiro.",
+                    "Exibir os campos atualizados no console com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Dados da Struct (acessados via ponteiro):\nCampo A: 42\nCampo B: 150.00"
+            },
+            {
+                conteudos: ["String", "Função"],
+                dificuldade: "Médio",
+                titulo: "Processamento de Texto com Função",
+                descricao: "Crie um programa em C com uma função dedicada que receba uma string como parâmetro, realize a exibição formatada do texto recebido e retorne para a função main().",
+                requisitos: [
+                    "Declarar uma cadeia de caracteres (string) no programa.",
+                    "Criar uma função que receba a string como parâmetro (ex.: char texto[]).",
+                    "Invocar a função a partir da main() passando a string.",
+                    "Exibir o texto formatado no console com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Texto recebido pela funcao: \"Linguagem C\"\nProcessamento concluido com sucesso!"
+            },
+            {
+                conteudos: ["Variáveis", "If / Else"],
+                dificuldade: "Fácil",
+                titulo: "Classificador de Temperatura",
+                descricao: "Crie um programa em C que declare uma variável de temperatura em graus Celsius e classifique o clima como 'Frio' (abaixo de 18°C), 'Agradável' (entre 18°C e 26°C) ou 'Quente' (acima de 26°C).",
+                requisitos: [
+                    "Declarar uma variável numérica do tipo float para a temperatura.",
+                    "Utilizar estruturas condicionais if / else if / else.",
+                    "Exibir a classificação correta no console com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Temperatura: 22.0°C\nSaída: O clima está agradável!"
+            },
+            {
+                conteudos: ["Variáveis", "For"],
+                dificuldade: "Fácil",
+                titulo: "Gerador de Tabuada com For",
+                descricao: "Escreva um programa em C que declare uma variável inteira e utilize o laço 'for' para calcular e exibir a tabuada desse número de 1 a 10.",
+                requisitos: [
+                    "Declarar a variável numérica para a base da tabuada.",
+                    "Utilizar um laço for iterando de 1 até 10.",
+                    "Imprimir cada linha da multiplicação com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "7 * 1 = 7\n7 * 2 = 14\n...\n7 * 10 = 70"
+            },
+            {
+                conteudos: ["Variáveis", "While"],
+                dificuldade: "Fácil",
+                titulo: "Contagem Regressiva com While",
+                descricao: "Implemente um programa em C que inicialize uma variável contadora e faça uma contagem decrescente até 0 utilizando a estrutura 'while'.",
+                requisitos: [
+                    "Inicializar a variável contadora.",
+                    "Utilizar estrutura while decrementando o contador.",
+                    "Exibir cada valor da contagem com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "10\n9\n8\n...\n0\nContagem finalizada!"
+            },
+            {
+                conteudos: ["Array", "For"],
+                dificuldade: "Médio",
+                titulo: "Maior Elemento do Vetor com For",
+                descricao: "Desenvolva um programa em C que declare um array com 5 números inteiros, percorra o vetor utilizando um laço 'for' e determine qual é o maior valor presente.",
+                requisitos: [
+                    "Declarar um vetor de inteiros com 5 posições.",
+                    "Usar o laço for para percorrer os índices do vetor.",
+                    "Armazenar e exibir o maior elemento encontrado com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Vetor: {14, 82, 35, 91, 56}\nMaior valor encontrado: 91"
+            },
+            {
+                conteudos: ["If / Else", "String"],
+                dificuldade: "Médio",
+                titulo: "Verificação de String com Condicional",
+                descricao: "Crie um programa em C que declare uma string e utilize if / else para verificar uma característica do texto (como conferir se o primeiro caractere é uma letra maiúscula).",
+                requisitos: [
+                    "Declarar uma string com texto predefinido.",
+                    "Usar if / else para verificar a condição sobre os caracteres.",
+                    "Exibir mensagem com o resultado da validação usando printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Texto analisado: \"Programacao\"\nResultado: Primeira letra e maiuscula."
+            },
+            {
+                conteudos: ["Função", "Variáveis"],
+                dificuldade: "Médio",
+                titulo: "Calculadora de Média com Função",
+                descricao: "Escreva um programa em C com uma função dedicada que receba duas variáveis de notas e retorne a média aritmética calculada.",
+                requisitos: [
+                    "Declarar as variáveis de notas no programa principal.",
+                    "Implementar a função que calcula e retorna a média.",
+                    "Invocar a função na main() e exibir a média com printf().",
+                    "Finalizar o programa retornando 0 (return 0)."
+                ],
+                saidaEsperada: "Notas: 8.5 e 7.5\nMedia calculada: 8.00"
+            }
+        ];
+
+        // TEMPLATE PADRÃO DE CÓDIGO C
+        const TEMPLATE_CODIGO_C = `#include <stdio.h>
+
+int main() {
+    // Escreva seu código em C para resolver o desafio aqui
+    
+    printf("Programa executado com sucesso!\\n");
+    return 0;
+}
+`;
+
+        // ESTADO ATUAL DA APLICAÇÃO (ESTRUTURA DE DADOS COMPATÍVEL COM IA)
+        let desafioAtual = null;
+
+        // =========================================================================
+        // GERADOR E ADAPTADOR DE DESAFIOS (PRONTO PARA INTEGRAÇÃO COM IA)
+        // =========================================================================
+        function obterDesafio(dificuldade, conteudosSelecionados) {
+            // Chave de ordenação para correspondência estrita de conteúdos
+            const chaveBusca = [...conteudosSelecionados].sort().join("+");
+
+            // 1. Procura desafio pronto que tenha EXATAMENTE os conteúdos selecionados
+            // Dá preferência para o que também bate na dificuldade
+            let desafioPronto = BANCO_DESAFIOS.find(d => 
+                [...d.conteudos].sort().join("+") === chaveBusca &&
+                d.dificuldade.toLowerCase() === dificuldade.toLowerCase()
+            );
+
+            // Se não encontrou na mesma dificuldade, aceita um com os mesmos conteúdos e ajusta
+            if (!desafioPronto) {
+                desafioPronto = BANCO_DESAFIOS.find(d => 
+                    [...d.conteudos].sort().join("+") === chaveBusca
+                );
+            }
+
+            if (desafioPronto) {
+                return {
+                    dificuldade: dificuldade,
+                    conteudos: [...conteudosSelecionados],
+                    titulo: desafioPronto.titulo,
+                    descricao: desafioPronto.descricao,
+                    requisitos: [...desafioPronto.requisitos],
+                    saidaEsperada: desafioPronto.saidaEsperada
+                };
+            }
+
+            // 2. Fallback dinâmico: gera desafio estritamente com os conteúdos escolhidos
+            return gerarDesafioFallback(dificuldade, conteudosSelecionados);
+        }
+
+        function gerarDesafioFallback(dificuldade, conteudosSelecionados) {
+            const listaConteudos = conteudosSelecionados.join(", ");
+            const titulo = "Desafio de C - " + conteudosSelecionados.join(" e ");
+            
+            const descricao = `Desenvolva um programa em linguagem C (nível ${dificuldade.toLowerCase()}) estruturado para aplicar exclusivamente os seguintes conceitos selecionados: ${listaConteudos}.`;
+
+            // Adiciona requisitos específicos APENAS dos conteúdos selecionados
+            const requisitos = conteudosSelecionados.map(c => 
+                REQUISITOS_CONCEITOS[c] || `Implementar o uso prático de ${c} no programa.`
+            );
+            requisitos.push("Finalizar o programa retornando 0 (return 0).");
+
+            const saidaEsperada = `[Execução - ${conteudosSelecionados.join(" + ")}]\nPrograma executado com sucesso!\nConceitos aplicados: ${listaConteudos}\nCódigo de saída: 0`;
+
+            return {
+                dificuldade: dificuldade,
+                conteudos: [...conteudosSelecionados],
+                titulo: titulo,
+                descricao: descricao,
+                requisitos: requisitos,
+                saidaEsperada: saidaEsperada
+            };
+        }
+
+        // =========================================================================
+        // NAVEGAÇÃO ENTRE TELAS
+        // =========================================================================
+        function navegarPara(telaId) {
+            document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+            
+            const destino = document.getElementById(telaId);
+            if (destino) {
+                destino.classList.add('ativa');
+            }
+
+            // Garante scroll no topo ao trocar de tela
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =========================================================================
+        // 1. GERAR DESAFIO
+        // =========================================================================
+        async function gerarDesafio() {
+            const dificuldade = document.getElementById("dificuldade").value;
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const alerta = document.getElementById("alerta-selecao");
+
+            const conteudos = [];
+            checkboxes.forEach(item => conteudos.push(item.value));
+
+            if (conteudos.length === 0) {
+                alerta.style.display = "block";
+                alerta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            alerta.style.display = "none";
+
+            const botao = document.querySelector('#tela-criar .btn-primario');
+            const textoOriginal = botao.textContent;
+            botao.disabled = true;
+            botao.textContent = "GERANDO DESAFIO...";
+
+            try {
+                const resposta = await fetch("https://desafios-de-prog.onrender.com/gerar-desafio", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        dificuldade: dificuldade,
+                        conteudos: conteudos
+                    })
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok || !resultado.sucesso) {
+                    throw new Error(resultado.detalhes?.error?.message || resultado.erro || "Não foi possível gerar o desafio.");
+                }
+
+                desafioAtual = interpretarDesafioIA(resultado.desafio, dificuldade, conteudos);
+                renderizarDetalhesDesafio();
+                navegarPara('tela-desafio');
+
+            } catch (erro) {
+                console.error("Erro ao gerar desafio:", erro);
+                alert("Não foi possível gerar o desafio. Verifique sua conexão e tente novamente.\n\nDetalhes: " + erro.message);
+            } finally {
+                botao.disabled = false;
+                botao.textContent = textoOriginal;
+            }
+        }
+
+        function interpretarDesafioIA(texto, dificuldade, conteudos) {
+            const desafio = {
+                dificuldade: dificuldade,
+                conteudos: [...conteudos],
+                titulo: "Desafio de C",
+                descricao: "",
+                requisitos: [],
+                saidaEsperada: ""
+            };
+
+            const secoes = {};
+            const regex = /(?:^|\n)(Título|Descricao|Descrição|Requisitos|Entrada|Saída|Saida):\s*([\s\S]*?)(?=\n(?:Título|Descricao|Descrição|Requisitos|Entrada|Saída|Saida):|$)/gi;
+            let match;
+
+            while ((match = regex.exec(texto || "")) !== null) {
+                secoes[match[1].toLowerCase()] = match[2].trim();
+            }
+
+            desafio.titulo = secoes["título"] || secoes["titulo"] || "Desafio de C";
+            desafio.descricao = secoes["descrição"] || secoes["descricao"] || "";
+
+            const requisitosTexto = secoes["requisitos"] || "";
+            desafio.requisitos = requisitosTexto
+                .split("\n")
+                .map(item => item.trim())
+                .filter(item => item.length > 0)
+                .map(item => item.replace(/^[-*•]\s*/, "").replace(/^\d+[.)]\s*/, ""));
+
+            if (desafio.requisitos.length === 0 && requisitosTexto) {
+                desafio.requisitos = [requisitosTexto];
+            }
+
+            const entrada = secoes["entrada"] || "";
+            const saida = secoes["saída"] || secoes["saida"] || "";
+
+            if (entrada) {
+                desafio.requisitos.push("Entrada: " + entrada);
+            }
+
+            if (saida) {
+                desafio.requisitos.push("Saída: " + saida);
+            }
+
+            return desafio;
+        }
+
+        function renderizarDetalhesDesafio() {
+            if (!desafioAtual) return;
+
+            document.getElementById("desafio-titulo").textContent = desafioAtual.titulo;
+            
+            // Badge Dificuldade
+            const badgeDif = document.getElementById("desafio-badge-dificuldade");
+            badgeDif.textContent = desafioAtual.dificuldade;
+            badgeDif.className = "badge";
+            if (desafioAtual.dificuldade === "Fácil") badgeDif.classList.add("badge-dificuldade-facil");
+            else if (desafioAtual.dificuldade === "Médio") badgeDif.classList.add("badge-dificuldade-medio");
+            else badgeDif.classList.add("badge-dificuldade-dificil");
+
+            // Badges Conteúdos
+            const containerBadges = document.getElementById("desafio-badges-conteudo");
+            containerBadges.innerHTML = "";
+            desafioAtual.conteudos.forEach(c => {
+                const sp = document.createElement("span");
+                sp.className = "badge badge-topico";
+                sp.textContent = c;
+                containerBadges.appendChild(sp);
+            });
+
+            // Descrição e Requisitos
+            document.getElementById("desafio-descricao").textContent = desafioAtual.descricao;
+
+            const listaReq = document.getElementById("desafio-requisitos");
+            listaReq.innerHTML = "";
+            desafioAtual.requisitos.forEach(r => {
+                const li = document.createElement("li");
+                li.textContent = r;
+                listaReq.appendChild(li);
+            });
+
+            // Saída Esperada
+            const secaoExemplo = document.getElementById("secao-exemplo");
+            const boxExemplo = document.getElementById("desafio-exemplo");
+            const saida = desafioAtual.saidaEsperada || desafioAtual.exemplo;
+            if (saida) {
+                secaoExemplo.style.display = "block";
+                boxExemplo.textContent = saida;
+            } else {
+                secaoExemplo.style.display = "none";
+            }
+        }
+
+        // =========================================================================
+        // 2. COMEÇAR DESAFIO (INICIALIZAR TELA DE PROGRAMAÇÃO)
+        // =========================================================================
+        function comecarDesafio() {
+            if (!desafioAtual) return;
+
+            // Preenche dados do desafio no painel lateral de programação
+            document.getElementById("prog-titulo-resumo").textContent = desafioAtual.titulo;
+            document.getElementById("prog-painel-titulo").textContent = desafioAtual.titulo;
+
+            // Dificuldade e Badges no painel de programação
+            const badgeDif = document.getElementById("prog-painel-dificuldade");
+            badgeDif.textContent = desafioAtual.dificuldade;
+            badgeDif.className = "badge";
+            if (desafioAtual.dificuldade === "Fácil") badgeDif.classList.add("badge-dificuldade-facil");
+            else if (desafioAtual.dificuldade === "Médio") badgeDif.classList.add("badge-dificuldade-medio");
+            else badgeDif.classList.add("badge-dificuldade-dificil");
+
+            const containerBadges = document.getElementById("prog-painel-badges");
+            containerBadges.innerHTML = "";
+            desafioAtual.conteudos.forEach(c => {
+                const sp = document.createElement("span");
+                sp.className = "badge badge-topico";
+                sp.textContent = c;
+                containerBadges.appendChild(sp);
+            });
+
+            document.getElementById("prog-painel-descricao").textContent = desafioAtual.descricao;
+
+            const listaReq = document.getElementById("prog-painel-requisitos");
+            listaReq.innerHTML = "";
+            desafioAtual.requisitos.forEach(r => {
+                const li = document.createElement("li");
+                li.textContent = r;
+                listaReq.appendChild(li);
+            });
+
+            // Inicializa editor se estiver vazio
+            const editor = document.getElementById("editorCodigo");
+            if (!editor.value.trim()) {
+                editor.value = TEMPLATE_CODIGO_C;
+            }
+
+            // Reseta terminal
+            document.getElementById("statusTexto").textContent = "Pronto";
+            document.getElementById("statusDot").className = "status-dot";
+            document.getElementById("terminalSaida").textContent = '> Clique em "EXECUTAR" para compilar e executar o código C.';
+
+            // Navega para a tela de programação
+            navegarPara('tela-programacao');
+
+            // Por padrão, abre direto na aba de CÓDIGO para começar a programar
+            setTimeout(() => {
+                trocarAba(1);
+            }, 100);
+        }
+
+        // =========================================================================
+        // 3. CONTROLE DE ABAS E SUPORTE A SWIPE
+        // =========================================================================
+        const swipeContainer = document.getElementById("swipeContainer");
+        const btnAbaDesafio = document.getElementById("btn-aba-desafio");
+        const btnAbaCodigo = document.getElementById("btn-aba-codigo");
+
+        function trocarAba(indice) {
+            const largura = swipeContainer.offsetWidth;
+            swipeContainer.scrollTo({
+                left: indice * largura,
+                behavior: 'smooth'
+            });
+            atualizarEstiloAbas(indice);
+        }
+
+        function atualizarEstiloAbas(indice) {
+            if (indice === 0) {
+                btnAbaDesafio.classList.add("ativa");
+                btnAbaCodigo.classList.remove("ativa");
+            } else {
+                btnAbaCodigo.classList.add("ativa");
+                btnAbaDesafio.classList.remove("ativa");
+            }
+        }
+
+        // Sincroniza o botão da aba com o swipe no celular
+        let debounceScroll = null;
+        swipeContainer.addEventListener("scroll", function() {
+            clearTimeout(debounceScroll);
+            debounceScroll = setTimeout(function() {
+                const scrollLeft = swipeContainer.scrollLeft;
+                const largura = swipeContainer.offsetWidth;
+                const indice = Math.round(scrollLeft / (largura || 1));
+                atualizarEstiloAbas(indice);
+            }, 50);
+        });
+
+        // =========================================================================
+        // 4. EDITOR DE CÓDIGO (INDENTAÇÃO COM TAB E RESET)
+        // =========================================================================
+        const editorCodigo = document.getElementById("editorCodigo");
+
+        // Permite usar a tecla TAB para inserir 4 espaços
+        editorCodigo.addEventListener("keydown", function(e) {
+            if (e.key === "Tab") {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const valor = this.value;
+
+                this.value = valor.substring(0, start) + "    " + valor.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+
+        function resetarCodigo() {
+            if (confirm("Deseja redefinir o código para o modelo inicial?")) {
+                editorCodigo.value = TEMPLATE_CODIGO_C;
+            }
+        }
+
+        // =========================================================================
+        // 5. EXECUÇÃO SIMULADA DO CÓDIGO C
+        // =========================================================================
+        async function executarCodigoSimulado() {
+            const btn = document.getElementById("btnExecutar");
+            const terminal = document.getElementById("terminalSaida");
+            const statusTexto = document.getElementById("statusTexto");
+            const statusDot = document.getElementById("statusDot");
+            const codigo = editorCodigo.value.trim();
+
+            if (!codigo) {
+                terminal.textContent = "Erro: Nenhum código informado no editor.";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "⏳ Compilando...";
+            statusTexto.textContent = "Compilando...";
+            statusDot.className = "status-dot compilando";
+            terminal.textContent = "> Enviando código para o compilador...\n";
+
+            try {
+                const resposta = await fetch("https://desafios-de-prog.onrender.com/executar", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ codigo: codigo })
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw new Error(resultado.detalhes || resultado.erro || "Erro ao executar o código.");
+                }
+
+                statusTexto.textContent = resultado.status === "success" ? "Concluído" : "Erro";
+                statusDot.className = "status-dot";
+
+                let saida = "> Compilador C\n\n";
+
+                if (resultado.stdout) {
+                    saida += resultado.stdout;
+                }
+
+                if (resultado.stderr) {
+                    saida += "\n\n[ERRO]\n" + resultado.stderr;
+                }
+
+                if (resultado.exception) {
+                    saida += "\n\n[EXCEÇÃO]\n" + resultado.exception;
+                }
+
+                if (!resultado.stdout && !resultado.stderr && !resultado.exception) {
+                    saida += resultado.status === "success"
+                        ? "Programa executado sem saída no terminal."
+                        : "O programa não foi executado com sucesso.";
+                }
+
+                if (resultado.compilationTime !== undefined) {
+                    saida += "\n\nTempo de compilação: " + resultado.compilationTime + " ms";
+                }
+
+                if (resultado.executionTime !== undefined) {
+                    saida += "\nTempo de execução: " + resultado.executionTime + " ms";
+                }
+
+                terminal.textContent = saida;
+
+            } catch (erro) {
+                statusTexto.textContent = "Erro";
+                statusDot.className = "status-dot";
+                terminal.textContent = "Erro ao executar o código:\n" + erro.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "▶ EXECUTAR";
+            }
+        }
+
+
+        // =========================================================================
+        // MENU RETRÁTIL
+        // =========================================================================
+        const menuRetratil = document.getElementById("menuRetratil");
+        const btnMenuRetratil = document.getElementById("btnMenuRetratil");
+
+        btnMenuRetratil.addEventListener("click", function(evento) {
+            evento.stopPropagation();
+            const aberta = menuRetratil.classList.toggle("aberta");
+            btnMenuRetratil.classList.toggle("aberta", aberta);
+            btnMenuRetratil.setAttribute("aria-expanded", String(aberta));
+        });
+
+        menuRetratil.querySelector(".painel-menu-retratil").addEventListener("click", function(evento) {
+            evento.stopPropagation();
+        });
+
+        // DESAFIOS EM ANDAMENTO (SALVAMENTO LOCAL)
+        // =========================================================================
+        const DESAFIOS_STORAGE_KEY = "cDesafiosProgramacao_emAndamento";
+        const btnDesafios = document.getElementById("btnDesafios");
+        const desafiosContainer = document.getElementById("desafiosContainer");
+        const listaDesafios = document.getElementById("listaDesafios");
+        const editorCodigoPersistencia = document.getElementById("editorCodigo");
+        const selectDificuldadeWrapper = document.getElementById("selectDificuldadeWrapper");
+        const selectDificuldade = document.getElementById("dificuldade");
+
+        let ultimoDesafioPersistido = null;
+
+        function lerDesafiosSalvos() {
+            try {
+                const dados = JSON.parse(localStorage.getItem(DESAFIOS_STORAGE_KEY) || "[]");
+                return Array.isArray(dados) ? dados : [];
+            } catch (erro) {
+                console.warn("Não foi possível ler os desafios salvos:", erro);
+                return [];
+            }
+        }
+
+        function gravarDesafiosSalvos(desafios) {
+            try {
+                localStorage.setItem(DESAFIOS_STORAGE_KEY, JSON.stringify(desafios));
+            } catch (erro) {
+                console.warn("Não foi possível salvar os desafios:", erro);
+            }
+        }
+
+        function extrairCampoSalvo(desafio, prefixo) {
+            const requisito = (desafio.requisitos || []).find(item =>
+                String(item).toLowerCase().startsWith(prefixo.toLowerCase())
+            );
+            return requisito ? String(requisito).slice(prefixo.length).trim() : "";
+        }
+
+        function criarRegistroDesafio(desafio, codigoAtual) {
+            return {
+                id: desafio._salvoId || (Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 9)),
+                titulo: desafio.titulo || "Desafio de C",
+                dificuldade: desafio.dificuldade || "",
+                conteudos: Array.isArray(desafio.conteudos) ? [...desafio.conteudos] : [],
+                descricao: desafio.descricao || "",
+                requisitos: Array.isArray(desafio.requisitos) ? [...desafio.requisitos] : [],
+                entrada: desafio.entrada || extrairCampoSalvo(desafio, "Entrada:"),
+                saida: desafio.saida || desafio.saidaEsperada || extrairCampoSalvo(desafio, "Saída:"),
+                observacoes: desafio.observacoes || "",
+                saidaEsperada: desafio.saidaEsperada || "",
+                codigo: typeof codigoAtual === "string" ? codigoAtual : ""
+            };
+        }
+
+        function atualizarListaDesafios() {
+            const desafios = lerDesafiosSalvos();
+            listaDesafios.innerHTML = "";
+
+            if (desafios.length === 0) {
+                const vazio = document.createElement("div");
+                vazio.className = "desafio-salvo-vazio";
+                vazio.textContent = "Nenhum desafio em andamento salvo.";
+                listaDesafios.appendChild(vazio);
+                return;
+            }
+
+            desafios.forEach(desafio => {
+                const item = document.createElement("button");
+                item.type = "button";
+                item.className = "desafio-salvo-item";
+                item.setAttribute("role", "menuitem");
+                item.title = desafio.titulo || "Desafio de C";
+                item.textContent = desafio.titulo || "Desafio de C";
+                item.addEventListener("click", function(evento) {
+                    evento.stopPropagation();
+                    abrirDesafioSalvo(desafio.id);
+                });
+                listaDesafios.appendChild(item);
+            });
+        }
+
+        function salvarDesafioAtual(codigoForcado) {
+            if (!desafioAtual) return;
+
+            if (!desafioAtual._salvoId) {
+                desafioAtual._salvoId =
+                    Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 9);
+            }
+
+            const codigo = typeof codigoForcado === "string"
+                ? codigoForcado
+                : editorCodigoPersistencia.value;
+
+            const desafios = lerDesafiosSalvos();
+            const registro = criarRegistroDesafio(desafioAtual, codigo);
+            const indice = desafios.findIndex(item => item.id === registro.id);
+
+            if (indice >= 0) {
+                desafios[indice] = registro;
+            } else {
+                desafios.unshift(registro);
+            }
+
+            gravarDesafiosSalvos(desafios);
+            ultimoDesafioPersistido = desafioAtual;
+            atualizarListaDesafios();
+        }
+
+        function sincronizarDesafioAtual() {
+            if (!desafioAtual) return;
+
+            // Detecta um novo desafio gerado pela IA sem modificar gerarDesafio().
+            if (desafioAtual !== ultimoDesafioPersistido) {
+                salvarDesafioAtual(editorCodigoPersistencia.value);
+            }
+        }
+
+        function abrirDesafioSalvo(id) {
+            const desafioSalvo = lerDesafiosSalvos().find(item => item.id === id);
+            if (!desafioSalvo) return;
+
+            desafioAtual = {
+                dificuldade: desafioSalvo.dificuldade,
+                conteudos: Array.isArray(desafioSalvo.conteudos) ? [...desafioSalvo.conteudos] : [],
+                titulo: desafioSalvo.titulo || "Desafio de C",
+                descricao: desafioSalvo.descricao || "",
+                requisitos: Array.isArray(desafioSalvo.requisitos) ? [...desafioSalvo.requisitos] : [],
+                saidaEsperada: desafioSalvo.saidaEsperada || desafioSalvo.saida || "",
+                entrada: desafioSalvo.entrada || "",
+                saida: desafioSalvo.saida || "",
+                observacoes: desafioSalvo.observacoes || "",
+                _salvoId: desafioSalvo.id
+            };
+
+            editorCodigoPersistencia.value = desafioSalvo.codigo || "";
+            renderizarDetalhesDesafio();
+            comecarDesafio();
+            editorCodigoPersistencia.value = desafioSalvo.codigo || "";
+
+            ultimoDesafioPersistido = desafioAtual;
+            menuRetratil.classList.remove("aberta");
+            btnMenuRetratil.classList.remove("aberta");
+            btnMenuRetratil.setAttribute("aria-expanded", "false");
+            desafiosContainer.classList.remove("aberta");
+            btnDesafios.classList.remove("aberta");
+            btnDesafios.setAttribute("aria-expanded", "false");
+            atualizarListaDesafios();
+        }
+
+        btnDesafios.addEventListener("click", function(evento) {
+            evento.stopPropagation();
+            const aberta = desafiosContainer.classList.toggle("aberta");
+            btnDesafios.classList.toggle("aberta", aberta);
+            btnDesafios.setAttribute("aria-expanded", String(aberta));
+            if (aberta) atualizarListaDesafios();
+        });
+
+        listaDesafios.addEventListener("click", function(evento) {
+            evento.stopPropagation();
+        });
+
+        document.addEventListener("click", function() {
+            fecharMenuConta();
+            menuRetratil.classList.remove("aberta");
+            btnMenuRetratil.classList.remove("aberta");
+            btnMenuRetratil.setAttribute("aria-expanded", "false");
+            desafiosContainer.classList.remove("aberta");
+            btnDesafios.classList.remove("aberta");
+            btnDesafios.setAttribute("aria-expanded", "false");
+        });
+
+        editorCodigoPersistencia.addEventListener("input", function() {
+            sincronizarDesafioAtual();
+            if (desafioAtual) salvarDesafioAtual(this.value);
+        });
+
+        window.addEventListener("beforeunload", function() {
+            if (desafioAtual) salvarDesafioAtual(editorCodigoPersistencia.value);
+        });
+
+        // O desafio recém-retornado pela IA é salvo assim que gerarDesafio() terminar,
+        // sem substituir nem modificar a função existente.
+        setInterval(sincronizarDesafioAtual, 250);
+        atualizarListaDesafios();
+
+        // Seta da dificuldade: um único elemento gira no próprio centro.
+        // O clique alterna entre aberta e fechada, inclusive ao clicar novamente no próprio campo.
+        selectDificuldade.addEventListener("click", function() {
+            const aberta = selectDificuldadeWrapper.classList.toggle("aberta");
+            selectDificuldade.setAttribute("aria-expanded", String(aberta));
+        });
+
+        selectDificuldade.addEventListener("change", function() {
+            selectDificuldadeWrapper.classList.remove("aberta");
+            selectDificuldade.setAttribute("aria-expanded", "false");
+        });
+
+        selectDificuldade.addEventListener("blur", function() {
+            selectDificuldadeWrapper.classList.remove("aberta");
+            selectDificuldade.setAttribute("aria-expanded", "false");
+        });
+
+        selectDificuldade.addEventListener("keydown", function(evento) {
+            if (evento.key === "Escape") {
+                selectDificuldadeWrapper.classList.remove("aberta");
+                selectDificuldade.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        // =========================================================================
+        // CONTA / LOGIN — ETAPA VISUAL (SEM SUPABASE)
+        // =========================================================================
+        const contaContainer = document.getElementById("contaContainer");
+        const btnConta = document.getElementById("btnConta");
+        const menuConta = document.getElementById("menuConta");
+        const btnFazerLogin = document.getElementById("btnFazerLogin");
+        const modalContaOverlay = document.getElementById("modalContaOverlay");
+        const fecharModalConta = document.getElementById("fecharModalConta");
+        const telaLoginConta = document.getElementById("telaLoginConta");
+        const telaCadastroConta = document.getElementById("telaCadastroConta");
+        const telaRecuperacaoConta = document.getElementById("telaRecuperacaoConta");
+
+        function fecharMenuConta() {
+            contaContainer.classList.remove("aberta");
+            btnConta.classList.remove("aberta");
+            btnConta.setAttribute("aria-expanded", "false");
+        }
+
+        function abrirMenuConta() {
+            contaContainer.classList.add("aberta");
+            btnConta.classList.add("aberta");
+            btnConta.setAttribute("aria-expanded", "true");
+        }
+
+        function mostrarTelaConta(tela) {
+            telaLoginConta.style.display = tela === "login" ? "block" : "none";
+            telaCadastroConta.style.display = tela === "cadastro" ? "block" : "none";
+            telaRecuperacaoConta.style.display = tela === "recuperacao" ? "block" : "none";
+        }
+
+        function abrirModalConta(tela = "login") {
+            fecharMenuConta();
+            mostrarTelaConta(tela);
+            modalContaOverlay.classList.add("aberta");
+            modalContaOverlay.setAttribute("aria-hidden", "false");
+        }
+
+        function fecharModalContaVisual() {
+            modalContaOverlay.classList.remove("aberta");
+            modalContaOverlay.setAttribute("aria-hidden", "true");
+        }
+
+        btnConta.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const aberta = contaContainer.classList.contains("aberta");
+            if (aberta) fecharMenuConta();
+            else abrirMenuConta();
+        });
+
+        menuConta.addEventListener("click", function(e) {
+            e.stopPropagation();
+        });
+
+        btnFazerLogin.addEventListener("click", function() {
+            abrirModalConta("login");
+        });
+
+        document.getElementById("btnMostrarCadastro").addEventListener("click", function() {
+            mostrarTelaConta("cadastro");
+        });
+
+        document.getElementById("btnVoltarLogin").addEventListener("click", function() {
+            mostrarTelaConta("login");
+        });
+
+        document.getElementById("btnEsqueciSenha").addEventListener("click", function() {
+            mostrarTelaConta("recuperacao");
+        });
+
+        document.getElementById("btnVoltarLoginRecuperacao").addEventListener("click", function() {
+            mostrarTelaConta("login");
+        });
+
+        fecharModalConta.addEventListener("click", fecharModalContaVisual);
+
+        modalContaOverlay.addEventListener("click", function(e) {
+            if (e.target === modalContaOverlay) fecharModalContaVisual();
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                fecharMenuConta();
+                fecharModalContaVisual();
+            }
+        });
+
+        // =========================================================================
+        // BOTÃO DE AJUDA
+        // =========================================================================
+        const btnAjuda = document.getElementById("btnAjuda");
+        const janelaAjuda = document.getElementById("janelaAjuda");
+
+        btnAjuda.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const aberta = janelaAjuda.classList.toggle("aberta");
+            btnAjuda.classList.toggle("aberta", aberta);
+            btnAjuda.setAttribute("aria-expanded", String(aberta));
+        });
+
+        janelaAjuda.addEventListener("click", function(e) {
+            e.stopPropagation();
+        });
+
+        document.addEventListener("click", function() {
+            janelaAjuda.classList.remove("aberta");
+            btnAjuda.classList.remove("aberta");
+            btnAjuda.setAttribute("aria-expanded", "false");
+        });
+
+        // Mostrar/ocultar senha nos campos de login e cadastro
+        document.querySelectorAll(".btn-olho-senha").forEach(function(botao) {
+            botao.addEventListener("click", function() {
+                const campo = document.getElementById(botao.dataset.target);
+                const mostrando = campo.type === "text";
+                campo.type = mostrando ? "password" : "text";
+                botao.setAttribute("aria-label", mostrando ? "Mostrar senha" : "Ocultar senha");
+                botao.innerHTML = mostrando
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 3.8"/><path d="M6.6 6.7C3.6 8.7 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.1-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+            });
+        });
+
+    </script>
+
+</body>
+</html>
