@@ -11,7 +11,7 @@ app.use(express.json());
 // CONFIGURAÇÕES DOS MODELOS
 // ======================================================
 
-const OPENROUTER_MODEL = "qwen/qwen3-coder:free";
+const OPENROUTER_MODEL = "qwen/qwen-2.5-coder-32b-instruct:free";
 const GROQ_MODEL = "openai/gpt-oss-120b";
 
 
