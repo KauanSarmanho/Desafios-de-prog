@@ -179,55 +179,61 @@ ${conteudos.join(", ")}
 REGRAS FUNDAMENTAIS
 ======================================================
 
-1. TODOS os conteúdos informados são obrigatórios.
+1. TODOS os conteúdos informados são obrigatórios e devem ser necessários para cumprir os requisitos do desafio.
 
-2. O desafio deve ser construído de forma que cada conteúdo tenha uma função REAL e relevante na solução.
+2. Cada conteúdo selecionado deve ter uma função REAL, relevante e verificável na solução. Não basta que ele apenas apareça no código.
 
-3. NÃO inclua um conteúdo apenas de forma superficial para dizer que ele foi utilizado.
+3. NÃO inclua um conteúdo selecionado apenas de forma superficial para dizer que ele foi utilizado. O enunciado deve criar um requisito concreto que torne seu uso necessário para resolver o problema.
 
-4. Os conteúdos devem estar integrados naturalmente ao problema. O desafio deve fazer sentido mesmo quando vários conteúdos são usados juntos.
+4. Os conteúdos selecionados devem estar integrados naturalmente ao problema. O desafio deve fazer sentido mesmo quando vários conteúdos são usados juntos.
 
-5. Sempre que possível, faça com que os conteúdos se complementem. Por exemplo, se houver Struct e Ponteiros, o problema deve criar uma situação em que trabalhar com estruturas por meio de funções e ponteiros seja naturalmente útil.
+5. CONTEÚDOS NÃO SELECIONADOS PODEM APARECER NATURALMENTE na implementação do aluno quando forem úteis ou convenientes, mas NÃO podem ser transformados em requisitos obrigatórios, nem devem ser explicitamente exigidos pelo enunciado.
 
-6. Se houver Array e String, o problema deve exigir manipulação relevante de conjuntos de dados e textos, e não apenas uma declaração isolada.
+6. Nunca crie um requisito do tipo "utilize X" para um conteúdo que não esteja na lista de conteúdos obrigatórios. Se um conteúdo não selecionado aparecer como consequência natural de uma solução possível, isso não deve ser considerado critério de aprovação ou reprovação.
 
-7. Se houver Função, o problema deve possuir operações que façam sentido separar em funções.
+7. Os requisitos devem avaliar o COMPORTAMENTO e o resultado esperado do programa, sem exigir conteúdos não selecionados apenas por preferência de implementação.
 
-8. Se houver If-Else, devem existir decisões ou regras de negócio que dependam de condições.
+9. Sempre que possível, faça com que os conteúdos se complementem. Por exemplo, se houver Struct e Ponteiros, o problema deve criar uma situação em que trabalhar com estruturas por meio de funções e ponteiros seja naturalmente útil.
 
-9. Se houver For, deve existir processamento repetitivo que seja realmente necessário para resolver o problema.
+10. Se houver Array e String, o problema deve exigir manipulação relevante de conjuntos de dados e textos, e não apenas uma declaração isolada.
 
-10. Se houver conteúdos mais avançados, como Struct, Ponteiros ou outros, o desafio deve criar uma situação que justifique seu uso.
+11. Se houver Função, o problema deve possuir operações que façam sentido separar em funções.
 
-11. Não transforme o desafio em uma lista artificial de tarefas só para encaixar os conteúdos.
+12. Se houver If-Else, devem existir decisões ou regras de negócio que dependam de condições.
 
-12. O problema deve ter uma situação ou objetivo claro, preferencialmente semelhante a uma situação prática do mundo real, sempre que isso combinar com os conteúdos selecionados.
+13. Se houver For, deve existir processamento repetitivo que seja realmente necessário para resolver o problema.
 
-13. A dificuldade deve ser compatível com a quantidade e o nível dos conteúdos selecionados.
+14. Se houver conteúdos mais avançados, como Struct, Ponteiros ou outros, o desafio deve criar uma situação que justifique seu uso.
 
-14. Quanto maior a dificuldade, mais integrada e elaborada pode ser a lógica do problema, sem exigir conteúdos que não foram selecionados.
+15. Não transforme o desafio em uma lista artificial de tarefas só para encaixar os conteúdos.
 
-15. O enunciado deve permitir que outra IA consiga verificar posteriormente se os requisitos foram realmente cumpridos.
+16. O problema deve ter uma situação ou objetivo claro, preferencialmente semelhante a uma situação prática do mundo real, sempre que isso combinar com os conteúdos selecionados.
 
-16. Os requisitos devem ser CONCRETOS e VERIFICÁVEIS. Evite requisitos vagos como "use corretamente as variáveis" ou "faça um bom programa".
+17. A dificuldade deve ser compatível com a quantidade e o nível dos conteúdos selecionados.
 
-17. Quando um conteúdo puder ser especificado de maneira concreta sem obrigar uma única implementação válida, faça isso. Por exemplo, se Struct estiver selecionado, pode ser apropriado exigir o armazenamento de informações de cada item por meio de uma estrutura de dados.
+18. Quanto maior a dificuldade, mais integrada e elaborada pode ser a lógica do problema, sem exigir conteúdos que não foram selecionados.
 
-18. Não obrigue nomes específicos de variáveis ou funções, a menos que isso seja necessário para o problema.
+19. O enunciado deve permitir que outra IA consiga verificar posteriormente se os requisitos foram realmente cumpridos.
 
-19. Não exija uma técnica específica quando existirem várias implementações corretas que atendam ao objetivo.
+20. Os requisitos devem ser CONCRETOS e VERIFICÁVEIS. Evite requisitos vagos como "use corretamente as variáveis" ou "faça um bom programa".
 
-20. Não forneça código.
+21. Quando um conteúdo puder ser especificado de maneira concreta sem obrigar uma única implementação válida, faça isso. Por exemplo, se Struct estiver selecionado, pode ser apropriado exigir o armazenamento de informações de cada item por meio de uma estrutura de dados.
 
-21. Não forneça solução.
+22. Não obrigue nomes específicos de variáveis ou funções, a menos que isso seja necessário para o problema.
 
-22. Não forneça dicas de implementação.
+23. Não exija uma técnica específica quando existirem várias implementações corretas que atendam ao objetivo.
 
-23. Não explique como resolver.
+24. Não forneça código.
 
-24. Não faça introduções ou despedidas.
+25. Não forneça solução.
 
-25. Seja direto, claro e objetivo.
+26. Não forneça dicas de implementação.
+
+27. Não explique como resolver.
+
+28. Não faça introduções ou despedidas.
+
+29. Seja direto, claro e objetivo.
 
 ======================================================
 VALIDAÇÃO INTERNA ANTES DE RESPONDER
@@ -235,8 +241,10 @@ VALIDAÇÃO INTERNA ANTES DE RESPONDER
 
 Antes de gerar a resposta final, verifique internamente:
 
-- Todos os conteúdos obrigatórios possuem uma função relevante no desafio?
-- Existe algum conteúdo incluído apenas para cumprir a lista?
+- Todos os conteúdos obrigatórios possuem uma função relevante e necessária no desafio?
+- Cada conteúdo selecionado está ligado a pelo menos um requisito concreto e verificável?
+- Existe algum conteúdo selecionado incluído apenas para cumprir a lista?
+- Existe algum conteúdo NÃO selecionado transformado em requisito obrigatório? Se sim, reformule o desafio.
 - Os requisitos permitem verificar objetivamente se a solução está correta?
 - A entrada e a saída são compatíveis com os requisitos?
 - O desafio é realmente adequado à dificuldade informada?
