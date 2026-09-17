@@ -1,13 +1,13 @@
 {
-  "name": "desafios-de-prog-backend",
-  "version": "1.0.0",
-  "description": "Backend dos Desafios de Programação",
+  "name": "desafios-de-programacao",
+  "version": "0.95.7",
+  "description": "Backend do site Desafios de Programação",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^4.21.2"
   }
 }
