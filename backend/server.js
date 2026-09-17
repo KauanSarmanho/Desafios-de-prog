@@ -165,24 +165,88 @@ app.post("/gerar-desafio", async (req, res) => {
     }
 
     const prompt = `
-Você é um gerador de desafios de programação em C.
+Você é um gerador especializado de desafios de programação em linguagem C.
 
-Gere UM único desafio de programação.
+Sua tarefa é criar UM único desafio de programação que seja interessante, coerente, prático e compatível com o nível de dificuldade informado.
 
-Dificuldade: ${dificuldade}
+Dificuldade:
+${dificuldade}
 
 Conteúdos obrigatórios:
 ${conteudos.join(", ")}
 
-REGRAS:
-- O desafio deve realmente exigir o uso de todos os conteúdos informados.
-- Não forneça código.
-- Não forneça solução.
-- Não forneça dicas de implementação.
-- Não explique como resolver.
-- Não faça introduções ou despedidas.
-- Seja direto e conciso.
-- O desafio deve ser adequado ao nível de dificuldade informado.
+======================================================
+REGRAS FUNDAMENTAIS
+======================================================
+
+1. TODOS os conteúdos informados são obrigatórios.
+
+2. O desafio deve ser construído de forma que cada conteúdo tenha uma função REAL e relevante na solução.
+
+3. NÃO inclua um conteúdo apenas de forma superficial para dizer que ele foi utilizado.
+
+4. Os conteúdos devem estar integrados naturalmente ao problema. O desafio deve fazer sentido mesmo quando vários conteúdos são usados juntos.
+
+5. Sempre que possível, faça com que os conteúdos se complementem. Por exemplo, se houver Struct e Ponteiros, o problema deve criar uma situação em que trabalhar com estruturas por meio de funções e ponteiros seja naturalmente útil.
+
+6. Se houver Array e String, o problema deve exigir manipulação relevante de conjuntos de dados e textos, e não apenas uma declaração isolada.
+
+7. Se houver Função, o problema deve possuir operações que façam sentido separar em funções.
+
+8. Se houver If-Else, devem existir decisões ou regras de negócio que dependam de condições.
+
+9. Se houver For, deve existir processamento repetitivo que seja realmente necessário para resolver o problema.
+
+10. Se houver conteúdos mais avançados, como Struct, Ponteiros ou outros, o desafio deve criar uma situação que justifique seu uso.
+
+11. Não transforme o desafio em uma lista artificial de tarefas só para encaixar os conteúdos.
+
+12. O problema deve ter uma situação ou objetivo claro, preferencialmente semelhante a uma situação prática do mundo real, sempre que isso combinar com os conteúdos selecionados.
+
+13. A dificuldade deve ser compatível com a quantidade e o nível dos conteúdos selecionados.
+
+14. Quanto maior a dificuldade, mais integrada e elaborada pode ser a lógica do problema, sem exigir conteúdos que não foram selecionados.
+
+15. O enunciado deve permitir que outra IA consiga verificar posteriormente se os requisitos foram realmente cumpridos.
+
+16. Os requisitos devem ser CONCRETOS e VERIFICÁVEIS. Evite requisitos vagos como "use corretamente as variáveis" ou "faça um bom programa".
+
+17. Quando um conteúdo puder ser especificado de maneira concreta sem obrigar uma única implementação válida, faça isso. Por exemplo, se Struct estiver selecionado, pode ser apropriado exigir o armazenamento de informações de cada item por meio de uma estrutura de dados.
+
+18. Não obrigue nomes específicos de variáveis ou funções, a menos que isso seja necessário para o problema.
+
+19. Não exija uma técnica específica quando existirem várias implementações corretas que atendam ao objetivo.
+
+20. Não forneça código.
+
+21. Não forneça solução.
+
+22. Não forneça dicas de implementação.
+
+23. Não explique como resolver.
+
+24. Não faça introduções ou despedidas.
+
+25. Seja direto, claro e objetivo.
+
+======================================================
+VALIDAÇÃO INTERNA ANTES DE RESPONDER
+======================================================
+
+Antes de gerar a resposta final, verifique internamente:
+
+- Todos os conteúdos obrigatórios possuem uma função relevante no desafio?
+- Existe algum conteúdo incluído apenas para cumprir a lista?
+- Os requisitos permitem verificar objetivamente se a solução está correta?
+- A entrada e a saída são compatíveis com os requisitos?
+- O desafio é realmente adequado à dificuldade informada?
+- O problema continua coerente e natural com todos os conteúdos selecionados?
+
+Se algum conteúdo estiver artificial ou superficial, reformule o desafio antes de responder.
+
+======================================================
+FORMATO DA RESPOSTA
+======================================================
 
 Use EXATAMENTE este formato:
 
@@ -190,16 +254,18 @@ Título:
 [Nome do desafio]
 
 Descrição:
-[Descrição curta do problema]
+[Descrição clara e contextualizada do problema]
 
 Requisitos:
-[Lista objetiva do que o programa deve fazer]
+[Lista objetiva e verificável do que o programa deve fazer. Os requisitos devem deixar claro onde os conteúdos obrigatórios são necessários, mas sem fornecer a solução.]
 
 Entrada:
-[O que o usuário deverá informar]
+[Informações que o usuário deverá informar, incluindo quantidades, dados e restrições relevantes.]
 
 Saída:
-[O que o programa deverá exibir]
+[Informações que o programa deverá exibir e como os resultados devem ser apresentados.]
+
+Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
 `;
 
     try {
