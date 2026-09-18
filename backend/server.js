@@ -16,7 +16,7 @@ const GROQ_MODEL = "openai/gpt-oss-120b";
 app.get("/", (req, res) => {
     res.json({
         status: "online",
-        versao: "0.95.8",
+        versao: "0.95.9",
         mensagem: "Backend dos Desafios de Programação"
     });
 });
@@ -209,12 +209,21 @@ Avalie:
 
 Não altere o código do aluno.
 
+Para cada requisito, informe explicitamente se ele foi atendido ou não.
+
 Retorne somente um JSON válido neste formato:
 
 {
   "aprovado": true,
   "nota": 0,
   "resumo": "Resumo da análise",
+  "requisitos": [
+    {
+      "descricao": "String",
+      "atendido": true,
+      "justificativa": "Explicação"
+    }
+  ],
   "pontosPositivos": [
     "Ponto positivo"
   ],
@@ -327,6 +336,7 @@ Retorne somente um JSON válido neste formato:
                         aprovado: false,
                         nota: 0,
                         resumo: resultadoIA,
+                        requisitos: [],
                         pontosPositivos: [],
                         problemas: [],
                         sugestoes: [],
@@ -338,6 +348,7 @@ Retorne somente um JSON válido neste formato:
                     aprovado: false,
                     nota: 0,
                     resumo: resultadoIA,
+                    requisitos: [],
                     pontosPositivos: [],
                     problemas: [],
                     sugestoes: [],
