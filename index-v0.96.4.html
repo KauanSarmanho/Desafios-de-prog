@@ -1,0 +1,3637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Desafios de Programação em C</title>
+    <!-- Versão: v0.95.7 -->
+
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        :root {
+            --bg-page: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --border-color: #30363d;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --accent-green: #238636;
+            --accent-green-hover: #2ea043;
+            --accent-blue: #58a6ff;
+            --badge-easy: #238636;
+            --badge-medium: #d29922;
+            --badge-hard: #f85149;
+            --terminal-bg: #090d13;
+            --font-mono: 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* CABEÇALHO GLOBAL */
+        header.app-header {
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* MENU RETRÁTIL */
+        .menu-retratil {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 48px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+            z-index: 90;
+            transition: width 0.2s ease;
+        }
+
+        .menu-retratil.aberta {
+            width: 285px;
+        }
+
+        .btn-menu-retratil {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .btn-menu-retratil:hover,
+        .btn-menu-retratil.aberta {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .seta-menu {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            position: relative;
+            color: var(--text-muted);
+            transform: rotate(90deg);
+            transform-origin: center center;
+            transition: transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .seta-menu::before {
+            content: "";
+            position: absolute;
+            top: 3.5px;
+            left: 3.5px;
+            width: 7px;
+            height: 7px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transform-origin: center center;
+        }
+
+        .btn-menu-retratil.aberta .seta-menu {
+            transform: rotate(-90deg);
+        }
+
+        .painel-menu-retratil {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px 8px;
+            padding-right: 52px;
+            background: var(--bg-elevated);
+            overflow-y: auto;
+            scrollbar-width: none;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+            z-index: 1;
+        }
+
+        .painel-menu-retratil::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu-retratil.aberta .painel-menu-retratil {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        .menu-item-concluidos {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .menu-item-concluidos:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .brand:hover,
+        .brand:focus,
+        .brand:active,
+        .brand:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 30px;
+            height: 30px;
+            display: block;
+            flex-shrink: 0;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        header.app-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* ABA DE DESAFIOS SALVOS */
+        .desafios-container {
+            position: relative;
+            margin-left: 0;
+            flex-shrink: 0;
+        }
+
+        .painel-menu-retratil .desafios-container {
+            width: 100%;
+        }
+
+        .painel-menu-retratil .btn-desafios {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .btn-desafios {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 32px;
+            padding: 5px 9px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-desafios:hover,
+        .btn-desafios.aberta {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--border-color);
+        }
+
+        .seta-giro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            flex: 0 0 14px;
+            position: relative;
+            color: var(--text-muted);
+            transform: rotate(0deg);
+            transform-origin: center center;
+            transition: transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .seta-giro::before {
+            content: "";
+            position: absolute;
+            top: 3.5px;
+            left: 3.5px;
+            width: 7px;
+            height: 7px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transform-origin: center center;
+        }
+
+        /* Seta de DESAFIOS: sobe levemente, mantendo a mesma aparência e rotação. */
+        .btn-desafios .seta-giro {
+            top: -2px;
+        }
+
+        .btn-desafios.aberta .seta-giro,
+        .select-dificuldade.aberta .seta-giro {
+            transform: rotate(180deg);
+        }
+
+        .lista-desafios {
+            display: none;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .desafios-container.aberta .lista-desafios {
+            display: block;
+        }
+
+        .desafio-salvo-vazio {
+            padding: 12px 10px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .desafio-salvo-item {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .desafio-salvo-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        /* Ajuste da seta do campo de dificuldade: mesmo elemento e mesma rotação da aba */
+        .select-dificuldade select {
+            padding-right: 44px;
+        }
+
+        .select-dificuldade .seta-giro {
+            position: absolute;
+            top: calc(50% - 7px);
+            right: 14px;
+            transform: rotate(0deg);
+            transform-origin: center center;
+            z-index: 2;
+        }
+
+        .select-dificuldade.aberta .seta-giro {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 700px) {
+            .btn-desafios {
+                padding-left: 7px;
+                padding-right: 7px;
+            }
+
+            .menu-retratil {
+                width: 48px;
+            }
+
+            .menu-retratil.aberta {
+                width: min(285px, 100vw);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .lista-desafios {
+                left: -4px;
+                width: min(320px, calc(100vw - 28px));
+            }
+
+            /* No celular, quando fechado, o menu mostra somente a seta. */
+            .menu-retratil {
+                width: 36px;
+                background: transparent;
+                border-right: 0;
+            }
+
+            .menu-retratil:not(.aberta) .btn-menu-retratil {
+                right: 4px;
+                width: 28px;
+                height: 32px;
+                border: 0;
+                background: transparent;
+            }
+
+            .menu-retratil.aberta {
+                width: min(285px, 100vw);
+                background: var(--bg-card);
+                border-right: 1px solid var(--border-color);
+            }
+
+            /* A seta fechada fica sobre a lateral sem reservar espaço no conteúdo. */
+            main {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+                box-sizing: border-box;
+            }
+        }
+
+        /* BOTÃO E JANELA DE AJUDA */
+        .ajuda-container {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .btn-ajuda {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border: 1px solid #ffffff;
+            border-radius: 50%;
+            background: transparent;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .btn-ajuda:hover,
+        .btn-ajuda.aberta {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .janela-ajuda {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: min(340px, calc(100vw - 32px));
+            max-height: min(520px, calc(100vh - 90px));
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            font-size: 13px;
+            line-height: 1.45;
+            z-index: 110;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+        }
+
+        .janela-ajuda h3 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .janela-ajuda p {
+            margin: 0 0 10px;
+        }
+
+        .janela-ajuda p:last-child {
+            margin-bottom: 0;
+        }
+
+        .janela-ajuda strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .ajuda-container:hover .janela-ajuda,
+        .ajuda-container .janela-ajuda.aberta {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* SETA DO CAMPO DE DIFICULDADE */
+        .select-dificuldade {
+            position: relative;
+        }
+
+        .select-dificuldade select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 42px;
+        }
+
+        @media (max-width: 600px) {
+            .janela-ajuda {
+                right: -4px;
+                width: min(320px, calc(100vw - 28px));
+            }
+        }
+
+        main {
+            max-width: 850px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 16px;
+            flex: 1;
+        }
+
+        /* TELAS */
+        .tela {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .tela.ativa {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARTÕES */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        .campo {
+            margin-bottom: 22px;
+        }
+
+        label.titulo-campo {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-page);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* GRADE DE CONTEÚDOS */
+        .conteudos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .conteudo {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            transition: border-color 0.2s, background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .conteudo:hover {
+            border-color: var(--accent-blue);
+            background: #131b26;
+        }
+
+        .conteudo label {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .conteudo input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        /* BOTÕES GERAIS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.99);
+        }
+
+        .btn-primario {
+            background: var(--accent-green);
+            color: #ffffff;
+        }
+
+        .btn-primario:hover {
+            background: var(--accent-green-hover);
+        }
+
+        .btn-secundario {
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secundario:hover {
+            background: #2a313c;
+            border-color: #484f58;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 0;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+
+        /* MENSAGEM DE AVISO */
+        .alerta-erro {
+            display: none;
+            background: #3b181b;
+            color: #ff7b72;
+            border: 1px solid #672027;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        /* BADGES */
+        .badge-grupo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 18px 0;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-dificuldade-facil {
+            background: rgba(35, 134, 54, 0.2);
+            color: #3fb950;
+            border: 1px solid rgba(63, 185, 80, 0.4);
+        }
+
+        .badge-dificuldade-medio {
+            background: rgba(210, 153, 34, 0.2);
+            color: #e3b341;
+            border: 1px solid rgba(227, 179, 65, 0.4);
+        }
+
+        .badge-dificuldade-dificil {
+            background: rgba(248, 81, 73, 0.2);
+            color: #f85149;
+            border: 1px solid rgba(248, 81, 73, 0.4);
+        }
+
+        .badge-topico {
+            background: var(--bg-elevated);
+            color: var(--accent-blue);
+            border: 1px solid var(--border-color);
+        }
+
+        /* SEÇÃO DE DETALHES DO DESAFIO (TELA 2) */
+        .secao-info {
+            margin-bottom: 20px;
+        }
+
+        .secao-info h3 {
+            font-size: 15px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .descricao-texto {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .lista-requisitos {
+            list-style: none;
+            padding-left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lista-requisitos li {
+            padding: 10px 14px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .lista-requisitos li::before {
+            content: "✓";
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .bloco-exemplo {
+            background: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: #7ee787;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .acoes-desafio {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        /* TELA 3: PROGRAMAÇÃO (MOBILE-FIRST) */
+        #tela-programacao {
+            padding-bottom: 20px;
+        }
+
+        .prog-topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .prog-titulo-desafio {
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+
+        /* CONTROLE DE ABAS (DESAFIO / CÓDIGO) */
+        .abas-controle {
+            display: flex;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        .aba-btn {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .aba-btn.ativa {
+            background: var(--bg-card);
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .dica-swipe {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* CONTAINER DESLIZÁVEL (SWIPE NATIVO) */
+        .swipe-wrapper {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .swipe-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome, Safari */
+        }
+
+        .swipe-panel {
+            flex: 0 0 100%;
+            width: 100%;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        /* CONTEÚDO DO PAINEL DE CÓDIGO */
+        .editor-header {
+            background: #181d24;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-arquivo {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-reset:hover {
+            color: var(--text-main);
+            background: var(--bg-elevated);
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 280px;
+            background: #0f1319;
+            color: #f0f6fc;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            resize: vertical;
+            outline: none;
+            tab-size: 4;
+            white-space: pre;
+        }
+
+        .editor-textarea:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .editor-toolbar {
+            background: #181d24;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+
+        .btn-executar {
+            background: var(--accent-green);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 18px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-executar:hover {
+            background: var(--accent-green-hover);
+        }
+
+        .btn-executar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* CONSOLE TERMINAL */
+        .terminal-container {
+            background: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: #141920;
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3fb950;
+        }
+
+        .status-dot.compilando {
+            background: #e3b341;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .terminal-corpo {
+            position: relative;
+            min-height: 120px;
+            height: 180px;
+            max-height: 200px;
+            overflow: hidden;
+            background: var(--terminal-bg);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1d5da;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        
+      overflow-x: hidden;
+      overflow-y: auto;
+      min-width: 0;
+      min-height: 0;
+    }
+
+        .terminal-placeholder {
+            position: absolute;
+            inset: 0;
+            padding: 14px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1d5da;
+        }
+
+        .onecompiler-terminal-viewport {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--terminal-bg);
+            z-index: 2;
+        }
+
+        .onecompiler-terminal-frame {
+            position: absolute;
+            top: -430px;
+            left: 0;
+            width: 100%;
+            height: 620px;
+            min-width: 0;
+            border: 0;
+            display: block;
+            z-index: 1;
+        }
+
+        .terminal-loading {
+            position: absolute;
+            z-index: 5;
+            inset: 0;
+            padding: 14px;
+            pointer-events: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1d5da;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .btn-concluir-desafio {
+            margin-top: 12px;
+            background: var(--accent-blue);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 18px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .btn-concluir-desafio:hover:not(:disabled) {
+            background: var(--accent-blue-hover);
+        }
+
+        .btn-concluir-desafio:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* RESPONSIVIDADE ADICIONAL */
+        @media (min-width: 601px) {
+            .acoes-desafio {
+                flex-direction: row;
+            }
+
+            .acoes-desafio .btn {
+                width: auto;
+                flex: 1;
+            }
+
+            .editor-textarea {
+                height: 320px;
+            }
+        }
+
+        /* LOGIN / CONTA — SUPABASE AUTH */
+        .acoes-conta-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            position: relative;
+        }
+
+        .conta-container {
+            position: relative;
+        }
+
+        .btn-conta {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+
+        .btn-conta:hover,
+        .btn-conta.aberta {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-muted);
+        }
+
+        .icone-conta {
+            width: 17px;
+            height: 17px;
+            position: relative;
+            display: block;
+        }
+
+        .icone-conta::before {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border: 1.5px solid currentColor;
+            border-radius: 50%;
+            top: 0;
+            left: 4px;
+        }
+
+        .icone-conta::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 6px;
+            border: 1.5px solid currentColor;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            bottom: 0;
+            left: 1.5px;
+        }
+
+        .menu-conta {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 190px;
+            padding: 6px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+            z-index: 220;
+        }
+
+        .conta-container.aberta .menu-conta {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .item-menu-conta {
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .item-menu-conta:hover {
+            background: rgba(255,255,255,0.07);
+        }
+
+        .modal-conta-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.62);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, visibility 0.18s ease;
+            z-index: 500;
+        }
+
+        .modal-conta-overlay.aberta {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .modal-conta {
+            width: min(390px, 100%);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 16px 45px rgba(0,0,0,0.45);
+            position: relative;
+        }
+
+        .modal-conta h2 {
+            margin: 0 0 20px;
+            font-size: 20px;
+        }
+
+        .fechar-modal-conta {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 30px;
+            height: 30px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .fechar-modal-conta:hover {
+            background: rgba(255,255,255,0.07);
+            color: var(--text-main);
+        }
+
+        .campo-conta-modal {
+            margin-bottom: 14px;
+        }
+
+        .campo-conta-modal label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .campo-conta-modal input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: #0f1319;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .campo-conta-modal input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-conta-principal {
+            width: 100%;
+            padding: 11px 14px;
+            border: 0;
+            border-radius: 7px;
+            background: var(--accent-blue);
+            color: #0d1117;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .link-conta {
+            border: 0;
+            background: transparent;
+            color: var(--accent-blue);
+            padding: 0;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .texto-conta-secundario {
+            margin: 14px 0 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .link-esqueceu {
+            display: block;
+            margin: 12px auto 0;
+            font-size: 13px;
+        }
+
+        .modal-conta-secundario {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .estado-conta-falso {
+            display: none;
+        }
+
+        /* Modal de informações da conta */
+        .modal-info-conta {
+            width: min(720px, 100%);
+            max-height: calc(100vh - 40px);
+            overflow: hidden;
+            padding: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 16px 45px rgba(0,0,0,0.45);
+            position: relative;
+        }
+
+        .modal-info-conta-cabecalho {
+            padding: 20px 56px 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-info-conta-cabecalho h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .modal-info-conta-corpo {
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr);
+            min-height: 360px;
+        }
+
+        .menu-info-conta {
+            padding: 14px 10px;
+            border-right: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.08);
+        }
+
+        .item-info-conta {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 12px;
+            margin-bottom: 4px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-muted);
+            text-align: left;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .item-info-conta:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-main);
+        }
+
+        .item-info-conta.ativo {
+            background: rgba(255,255,255,0.09);
+            color: var(--text-main);
+        }
+
+        .conteudo-info-conta {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .conteudo-info-conta h3 {
+            margin: 0 0 22px;
+            font-size: 17px;
+        }
+
+        .info-conta-campo {
+            padding: 0 0 18px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-conta-campo:last-child {
+            margin-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .info-conta-rotulo {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .info-conta-valor-linha {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .info-conta-valor {
+            min-width: 0;
+            color: var(--text-main);
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .btn-editar-info-conta {
+            flex: 0 0 auto;
+            width: 30px;
+            height: 30px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-editar-info-conta svg {
+            width: 17px;
+            height: 17px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-editar-info-conta:hover {
+            background: rgba(255,255,255,0.07);
+            color: var(--text-main);
+        }
+
+        .btn-alterar-senha-conta {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-main);
+            font: inherit;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .btn-alterar-senha-conta:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .info-conta-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 14px;
+        }
+
+        .info-conta-status.ok {
+            color: #78d49a;
+        }
+
+        .info-conta-status.pendente {
+            color: #e8b96a;
+        }
+
+        .info-conta-edicao input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 11px;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: #0f1319;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .info-conta-edicao input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .info-conta-acoes {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-info-conta-secundario,
+        .btn-info-conta-principal {
+            padding: 9px 13px;
+            border-radius: 7px;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-info-conta-secundario {
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .btn-info-conta-principal {
+            border: 0;
+            background: var(--accent-blue);
+            color: #0d1117;
+            font-weight: 700;
+        }
+
+        .progresso-info-conta {
+            display: grid;
+            gap: 12px;
+        }
+
+        .progresso-info-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .progresso-info-item:last-child {
+            border-bottom: 0;
+        }
+
+        .progresso-info-item span:first-child {
+            color: var(--text-muted);
+        }
+
+        .progresso-info-item span:last-child {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .mensagem-info-conta {
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 600px) {
+            .modal-info-conta-corpo {
+                grid-template-columns: 1fr;
+                min-height: 0;
+            }
+
+            .menu-info-conta {
+                display: flex;
+                gap: 4px;
+                overflow-x: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--border-color);
+                padding: 10px;
+            }
+
+            .item-info-conta {
+                width: auto;
+                flex: 0 0 auto;
+                white-space: nowrap;
+            }
+
+            .conteudo-info-conta {
+                padding: 20px 18px;
+                max-height: calc(100vh - 210px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .acoes-conta-header {
+                gap: 8px;
+            }
+
+            .btn-ajuda,
+            .btn-conta {
+                width: 30px;
+                height: 30px;
+            }
+
+            .modal-conta {
+                padding: 22px 18px;
+            }
+        }
+
+        /* Ícone para mostrar/ocultar senha */
+        .campo-senha { position: relative; }
+        .campo-senha input { padding-right: 44px; }
+        .btn-olho-senha {
+            position: absolute; right: 10px; bottom: 9px; width: 30px; height: 30px;
+            border: 0; background: transparent; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 0; border-radius: 6px;
+        }
+        .btn-olho-senha:hover { color: var(--text-main); }
+        .btn-olho-senha svg { width: 19px; height: 19px; display: block; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <a class="brand" href="#tela-criar" aria-label="Ir para Gerar Desafios" onclick="navegarPara('tela-criar'); return false;">
+            <img class="brand-icon" src="favicon.png" alt="">
+            <h1>Desafios de Programação</h1>
+        </a>
+
+        <div class="acoes-conta-header">
+            <div class="ajuda-container">
+                <button
+                    id="btnAjuda"
+                    class="btn-ajuda"
+                    type="button"
+                    aria-label="Abrir ajuda"
+                    aria-expanded="false"
+                    aria-controls="janelaAjuda"
+                >?</button>
+
+                <div id="janelaAjuda" class="janela-ajuda" role="tooltip">
+                <h3>Como funciona o site?</h3>
+
+                <p><strong>1. Escolha a dificuldade</strong>
+                Selecione o nível do desafio que deseja fazer.</p>
+
+                <p><strong>2. Escolha os conteúdos</strong>
+                Selecione os conteúdos de programação em C que você quer praticar.</p>
+
+                <p><strong>3. Gere o desafio</strong>
+                Clique em "Gerar Desafio". A IA criará um desafio de acordo com a dificuldade e os conteúdos selecionados.</p>
+
+                <p><strong>4. Resolva o desafio</strong>
+                Leia os requisitos e escreva sua solução em C no editor de código.</p>
+
+                <p><strong>5. Execute seu código</strong>
+                Use o botão de executar para compilar e testar seu programa.</p>
+
+                <p><strong>Dica:</strong> Leia todos os requisitos do desafio antes de começar a programar.</p>
+                </div>
+            </div>
+
+            <div id="contaContainer" class="conta-container">
+                <button id="btnConta" class="btn-conta" type="button" aria-label="Conta do usuário" aria-expanded="false" aria-controls="menuConta">
+                    <span class="icone-conta" aria-hidden="true"></span>
+                </button>
+
+                <div id="menuConta" class="menu-conta" role="menu">
+                    <button id="btnFazerLogin" class="item-menu-conta" type="button">Fazer login</button>
+                    <div id="estadoContaLogada" class="estado-conta-falso" style="display:none;">
+                        <button id="btnInformacoesConta" class="item-menu-conta" type="button">Informações da conta</button>
+                        <button id="btnEncerrarSessao" class="item-menu-conta" type="button">Encerrar sessão</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <div id="modalInformacoesContaOverlay" class="modal-conta-overlay" aria-hidden="true">
+        <div class="modal-info-conta" role="dialog" aria-modal="true" aria-labelledby="tituloInformacoesConta">
+            <button id="fecharModalInformacoesConta" class="fechar-modal-conta" type="button" aria-label="Fechar">×</button>
+            <div class="modal-info-conta-cabecalho">
+                <h2 id="tituloInformacoesConta">Informações da conta</h2>
+            </div>
+
+            <div class="modal-info-conta-corpo">
+                <nav class="menu-info-conta" aria-label="Seções da conta">
+                    <button class="item-info-conta ativo" type="button" data-info-secao="perfil"><span>Perfil</span></button>
+                    <button class="item-info-conta" type="button" data-info-secao="seguranca"><span>Segurança</span></button>
+                    <button class="item-info-conta" type="button" data-info-secao="conta"><span>Conta</span></button>
+                    <button class="item-info-conta" type="button" data-info-secao="progresso"><span>Progresso</span></button>
+                </nav>
+
+                <section id="conteudoInfoConta" class="conteudo-info-conta" aria-live="polite"></section>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalContaOverlay" class="modal-conta-overlay" aria-hidden="true">
+        <div class="modal-conta" role="dialog" aria-modal="true" aria-labelledby="tituloModalConta">
+            <button id="fecharModalConta" class="fechar-modal-conta" type="button" aria-label="Fechar">×</button>
+            <div id="mensagemConta" role="status" aria-live="polite" style="display:none; margin-bottom:12px; font-size:13px;"></div>
+
+            <div id="telaLoginConta">
+                <h2 id="tituloModalConta">Entrar</h2>
+                <div class="campo-conta-modal">
+                    <label for="loginEmailVisual">E-mail</label>
+                    <input id="loginEmailVisual" type="email" placeholder="seu@email.com">
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="loginSenhaVisual">Senha</label>
+                    <input id="loginSenhaVisual" type="password" placeholder="Sua senha">
+                    <button class="btn-olho-senha" type="button" data-target="loginSenhaVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <button id="btnEntrarConta" class="btn-conta-principal" type="button">Entrar</button>
+                <button id="btnEsqueciSenha" class="link-conta link-esqueceu" type="button">Esqueci minha senha</button>
+
+                <p class="texto-conta-secundario">
+                    Ainda não tem uma conta?
+                    <button id="btnMostrarCadastro" class="link-conta" type="button">Cadastre-se</button>
+                </p>
+            </div>
+
+            <div id="telaCadastroConta" style="display:none;">
+                <h2>Criar conta</h2>
+                <div class="campo-conta-modal">
+                    <label for="cadastroNomeUsuarioVisual">Nome de usuário</label>
+                    <input id="cadastroNomeUsuarioVisual" type="text" placeholder="Escolha um nome de usuário" autocomplete="username">
+                </div>
+                <div class="campo-conta-modal">
+                    <label for="cadastroEmailVisual">E-mail</label>
+                    <input id="cadastroEmailVisual" type="email" placeholder="seu@email.com">
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="cadastroSenhaVisual">Senha</label>
+                    <input id="cadastroSenhaVisual" type="password" placeholder="Crie uma senha">
+                    <button class="btn-olho-senha" type="button" data-target="cadastroSenhaVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="cadastroConfirmacaoVisual">Confirmar senha</label>
+                    <input id="cadastroConfirmacaoVisual" type="password" placeholder="Repita a senha">
+                    <button class="btn-olho-senha" type="button" data-target="cadastroConfirmacaoVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <button id="btnCadastrarConta" class="btn-conta-principal" type="button">Cadastrar</button>
+                <p class="texto-conta-secundario">
+                    Já possui uma conta?
+                    <button id="btnVoltarLogin" class="link-conta" type="button">Entrar</button>
+                </p>
+            </div>
+
+            <div id="telaRecuperacaoConta" style="display:none;">
+                <h2>Recuperar senha</h2>
+                <div class="campo-conta-modal">
+                    <label for="recuperacaoEmailVisual">E-mail</label>
+                    <input id="recuperacaoEmailVisual" type="email" placeholder="seu@email.com">
+                </div>
+                <button id="btnEnviarRecuperacao" class="btn-conta-principal" type="button">Enviar e-mail de recuperação</button>
+                <p class="texto-conta-secundario">
+                    <button id="btnVoltarLoginRecuperacao" class="link-conta" type="button">Voltar para o login</button>
+                </p>
+            </div>
+
+            <div id="telaRedefinirConta" style="display:none;">
+                <h2>Redefinir senha</h2>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="novaSenhaVisual">Nova senha</label>
+                    <input id="novaSenhaVisual" type="password" placeholder="Digite sua nova senha" autocomplete="new-password">
+                    <button class="btn-olho-senha" type="button" data-target="novaSenhaVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <div class="campo-conta-modal campo-senha">
+                    <label for="confirmarNovaSenhaVisual">Confirmar nova senha</label>
+                    <input id="confirmarNovaSenhaVisual" type="password" placeholder="Repita a nova senha" autocomplete="new-password">
+                    <button class="btn-olho-senha" type="button" data-target="confirmarNovaSenhaVisual" aria-label="Mostrar senha">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                    </button>
+                </div>
+                <button id="btnRedefinirSenha" class="btn-conta-principal" type="button">Redefinir senha</button>
+                <p class="texto-conta-secundario">
+                    <button id="btnVoltarLoginRedefinir" class="link-conta" type="button">Voltar para o login</button>
+                </p>
+            </div>
+            </div>
+        </div>
+    </div>
+
+        <div id="menuRetratil" class="menu-retratil">
+            <button
+                id="btnMenuRetratil"
+                class="btn-menu-retratil"
+                type="button"
+                aria-label="Abrir menu"
+                aria-expanded="false"
+                aria-controls="painelMenuRetratil"
+            >
+                <span class="seta-menu" aria-hidden="true"></span>
+            </button>
+
+            <div id="painelMenuRetratil" class="painel-menu-retratil">
+                <div id="desafiosContainer" class="desafios-container">
+                    <button
+                        id="btnDesafios"
+                        class="btn-desafios"
+                        type="button"
+                        aria-label="Mostrar desafios em andamento"
+                        aria-expanded="false"
+                        aria-controls="listaDesafios"
+                    >
+                        DESAFIOS
+                        <span class="seta-giro" aria-hidden="true"></span>
+                    </button>
+
+                    <div id="listaDesafios" class="lista-desafios" role="menu">
+                        <div class="desafio-salvo-vazio">Nenhum desafio em andamento salvo.</div>
+                    </div>
+                </div>
+
+                <button class="menu-item-concluidos" type="button">DESAFIOS CONCLUÍDOS</button>
+            </div>
+        </div>
+
+
+    <main>
+
+        <!-- ========================================== -->
+        <!-- 1. TELA "CRIAR DESAFIO"                    -->
+        <!-- ========================================== -->
+        <section id="tela-criar" class="tela ativa">
+
+            <div class="card">
+                <h2>Crie seu desafio</h2>
+
+                <div id="alerta-selecao" class="alerta-erro">
+                    Por favor, selecione pelo menos um conteúdo para gerar o desafio.
+                </div>
+
+                <div class="campo">
+                    <label class="titulo-campo" for="dificuldade">Dificuldade</label>
+                    <div class="select-dificuldade" id="selectDificuldadeWrapper">
+                        <select id="dificuldade">
+                            <option value="Fácil">Fácil</option>
+                            <option value="Médio">Médio</option>
+                            <option value="Difícil">Difícil</option>
+                        </select>
+                        <span class="seta-giro" aria-hidden="true"></span>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label class="titulo-campo">Conteúdos</label>
+                    <div class="conteudos">
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Variáveis" checked>
+                                Variáveis
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="If / Else" checked>
+                                If / Else
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="For">
+                                For
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="While">
+                                While
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Array">
+                                Array
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="String">
+                                String
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Função">
+                                Função
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Struct">
+                                Struct
+                            </label>
+                        </div>
+
+                        <div class="conteudo">
+                            <label>
+                                <input type="checkbox" value="Ponteiros">
+                                Ponteiros
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button class="btn btn-primario" onclick="gerarDesafio()">
+                    GERAR DESAFIO
+                </button>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- 2. TELA "DESAFIO" (DETALHES)               -->
+        <!-- ========================================== -->
+        <section id="tela-desafio" class="tela">
+
+            <button class="btn-link" onclick="navegarPara('tela-criar')">
+                ← Alterar opções do desafio
+            </button>
+
+            <div class="card">
+                <h2 id="desafio-titulo">Título do Desafio</h2>
+
+                <div class="badge-grupo">
+                    <span id="desafio-badge-dificuldade" class="badge badge-dificuldade-facil">Fácil</span>
+                    <div id="desafio-badges-conteudo" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                </div>
+
+                <div class="secao-info">
+                    <h3>Descrição</h3>
+                    <p id="desafio-descricao" class="descricao-texto"></p>
+                </div>
+
+                <div class="secao-info">
+                    <h3>Requisitos Obrigatórios</h3>
+                    <ul id="desafio-requisitos" class="lista-requisitos"></ul>
+                </div>
+
+                <div class="secao-info" id="secao-exemplo" style="display: none;">
+                    <h3>Exemplo de Saída Esperada</h3>
+                    <div id="desafio-exemplo" class="bloco-exemplo"></div>
+                </div>
+
+                <div class="acoes-desafio">
+                    <button class="btn btn-primario" onclick="comecarDesafio()">
+                        COMEÇAR DESAFIO →
+                    </button>
+                    <button class="btn btn-secundario" onclick="navegarPara('tela-criar')">
+                        Voltar
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- 3. TELA "PROGRAMAÇÃO" (ABAS + SWIPE)       -->
+        <!-- ========================================== -->
+        <section id="tela-programacao" class="tela">
+
+            <div class="prog-topo">
+                <button class="btn-link" onclick="navegarPara('tela-desafio')" style="margin-bottom: 0;">
+                    ← Voltar ao Desafio
+                </button>
+                <div id="prog-titulo-resumo" class="prog-titulo-desafio"></div>
+            </div>
+
+            <!-- CONTROLE DE ABAS -->
+            <div class="abas-controle">
+                <button id="btn-aba-desafio" class="aba-btn" onclick="trocarAba(0)">
+                    📋 DESAFIO
+                </button>
+                <button id="btn-aba-codigo" class="aba-btn ativa" onclick="trocarAba(1)">
+                    💻 CÓDIGO
+                </button>
+            </div>
+
+            <span class="dica-swipe">💡 No celular, você pode deslizar para os lados para alternar entre as abas</span>
+
+            <!-- ÁREA DESLIZÁVEL HORIZONTALMENTE (SWIPE) -->
+            <div id="swipeContainer" class="swipe-wrapper">
+
+                <!-- ABA 1: VISUALIZAÇÃO DO DESAFIO -->
+                <div class="swipe-panel" id="panel-desafio">
+                    <div class="card">
+                        <h2 id="prog-painel-titulo">Título</h2>
+                        
+                        <div class="badge-grupo">
+                            <span id="prog-painel-dificuldade" class="badge badge-dificuldade-facil">Fácil</span>
+                            <div id="prog-painel-badges" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                        </div>
+
+                        <div class="secao-info">
+                            <h3>Descrição</h3>
+                            <p id="prog-painel-descricao" class="descricao-texto"></p>
+                        </div>
+
+                        <div class="secao-info">
+                            <h3>Requisitos</h3>
+                            <ul id="prog-painel-requisitos" class="lista-requisitos"></ul>
+                        </div>
+
+                        <button class="btn btn-secundario" onclick="trocarAba(1)" style="margin-top: 10px;">
+                            Ir para o Editor de Código →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA 2: EDITOR DE CÓDIGO + TERMINAL -->
+                <div class="swipe-panel" id="panel-codigo">
+                    
+                    <div class="editor-header">
+                        <span class="editor-arquivo">📄 main.c</span>
+                        <button class="btn-reset" onclick="resetarCodigo()" title="Restaurar código inicial">↺ Resetar Código</button>
+                    </div>
+
+                    <textarea id="editorCodigo" class="editor-textarea" spellcheck="false" placeholder="Escreva seu código em C aqui..."></textarea>
+
+                    <div class="editor-toolbar">
+                        <button id="btnExecutar" class="btn-executar" onclick="executarCodigoSimulado()">
+                            ▶ EXECUTAR
+                        </button>
+                    </div>
+
+                    <div class="terminal-container">
+                        <div class="terminal-header">
+                            <span>TERMINAL DE SAÍDA</span>
+                            <div class="terminal-status">
+                                <span id="statusDot" class="status-dot"></span>
+                                <span id="statusTexto">Pronto</span>
+                            </div>
+                        </div>
+                        <div id="terminalSaida" class="terminal-corpo">
+                            <div id="terminalPlaceholder" class="terminal-placeholder">&gt; Clique em "EXECUTAR" para compilar e executar o código C.</div>
+                            <div id="terminalLoading" class="terminal-loading" style="display:none;"></div>
+                            <div id="oneCompilerTerminalViewport" class="onecompiler-terminal-viewport" aria-label="Terminal do OneCompiler">
+                                <iframe
+                                    id="oneCompilerTerminal"
+                                    class="onecompiler-terminal-frame"
+                                    src="https://onecompiler.com/embed/c?theme=dark&hideLanguageSelection=true&hideNew=true&hideNewFileOption=true&hideTitle=true&hideEditorOptions=true&hideRun=true&listenToEvents=true">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btnConcluirDesafio" class="btn-concluir-desafio" type="button" disabled>
+                        ✓ CONCLUIR DESAFIO
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // TEMPLATE PADRÃO DE CÓDIGO C
+        const TEMPLATE_CODIGO_C = `#include <stdio.h>
+
+int main() {
+    // Escreva seu código em C para resolver o desafio aqui
+    
+    printf("Programa executado com sucesso!\\n");
+    return 0;
+}
+`;
+
+        // ESTADO ATUAL DA APLICAÇÃO (ESTRUTURA DE DADOS COMPATÍVEL COM IA)
+        let desafioAtual = null;
+        let analiseConclusaoEmAndamento = false;
+
+        // =========================================================================
+        // NAVEGAÇÃO ENTRE TELAS
+        // =========================================================================
+        function navegarPara(telaId) {
+            document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+            
+            const destino = document.getElementById(telaId);
+            if (destino) {
+                destino.classList.add('ativa');
+            }
+
+            // Garante scroll no topo ao trocar de tela
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =========================================================================
+        // 1. GERAR DESAFIO
+        // =========================================================================
+        async function gerarDesafio() {
+            // A geração de desafios exige uma sessão autenticada.
+            // Se a pessoa não estiver logada, abre a tela de login e interrompe a geração.
+            try {
+                const { data: sessaoData, error: erroSessao } = await supabaseClient.auth.getSession();
+
+                if (erroSessao || !sessaoData?.session) {
+                    abrirModalConta("login");
+                    return;
+                }
+            } catch (erro) {
+                console.error("Não foi possível verificar a sessão antes de gerar o desafio:", erro);
+                abrirModalConta("login");
+                return;
+            }
+
+            const dificuldade = document.getElementById("dificuldade").value;
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const alerta = document.getElementById("alerta-selecao");
+
+            const conteudos = [];
+            checkboxes.forEach(item => conteudos.push(item.value));
+
+            if (conteudos.length === 0) {
+                alerta.style.display = "block";
+                alerta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            alerta.style.display = "none";
+
+            const botao = document.querySelector('#tela-criar .btn-primario');
+            const textoOriginal = botao.textContent;
+            botao.disabled = true;
+            botao.textContent = "GERANDO DESAFIO...";
+
+            try {
+                const resposta = await fetch("https://desafios-de-prog.onrender.com/gerar-desafio", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        dificuldade: dificuldade,
+                        conteudos: conteudos
+                    })
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok || !resultado.sucesso) {
+                    throw new Error(resultado.detalhes?.error?.message || resultado.erro || "Não foi possível gerar o desafio.");
+                }
+
+                desafioAtual = interpretarDesafioIA(resultado.desafio, dificuldade, conteudos);
+                await salvarDesafioNoSupabase(desafioAtual);
+                renderizarDetalhesDesafio();
+                navegarPara('tela-desafio');
+
+            } catch (erro) {
+                console.error("Erro ao gerar desafio:", erro);
+                alert("Não foi possível gerar o desafio. Verifique sua conexão e tente novamente.\n\nDetalhes: " + erro.message);
+            } finally {
+                botao.disabled = false;
+                botao.textContent = textoOriginal;
+            }
+        }
+
+        function interpretarDesafioIA(texto, dificuldade, conteudos) {
+            const desafio = {
+                dificuldade: dificuldade,
+                conteudos: [...conteudos],
+                titulo: "Desafio de C",
+                descricao: "",
+                requisitos: [],
+                saidaEsperada: ""
+            };
+
+            const secoes = {};
+            const regex = /(?:^|\n)(Título|Descricao|Descrição|Requisitos|Entrada|Saída|Saida):\s*([\s\S]*?)(?=\n(?:Título|Descricao|Descrição|Requisitos|Entrada|Saída|Saida):|$)/gi;
+            let match;
+
+            while ((match = regex.exec(texto || "")) !== null) {
+                secoes[match[1].toLowerCase()] = match[2].trim();
+            }
+
+            desafio.titulo = secoes["título"] || secoes["titulo"] || "Desafio de C";
+            desafio.descricao = secoes["descrição"] || secoes["descricao"] || "";
+
+            const requisitosTexto = secoes["requisitos"] || "";
+            desafio.requisitos = requisitosTexto
+                .split("\n")
+                .map(item => item.trim())
+                .filter(item => item.length > 0)
+                .map(item => item.replace(/^[-*•]\s*/, "").replace(/^\d+[.)]\s*/, ""));
+
+            if (desafio.requisitos.length === 0 && requisitosTexto) {
+                desafio.requisitos = [requisitosTexto];
+            }
+
+            const entrada = secoes["entrada"] || "";
+            const saida = secoes["saída"] || secoes["saida"] || "";
+
+            if (entrada) {
+                desafio.requisitos.push("Entrada: " + entrada);
+            }
+
+            if (saida) {
+                desafio.requisitos.push("Saída: " + saida);
+            }
+
+            return desafio;
+        }
+
+        function renderizarDetalhesDesafio() {
+            if (!desafioAtual) return;
+
+            document.getElementById("desafio-titulo").textContent = desafioAtual.titulo;
+            
+            // Badge Dificuldade
+            const badgeDif = document.getElementById("desafio-badge-dificuldade");
+            badgeDif.textContent = desafioAtual.dificuldade;
+            badgeDif.className = "badge";
+            if (desafioAtual.dificuldade === "Fácil") badgeDif.classList.add("badge-dificuldade-facil");
+            else if (desafioAtual.dificuldade === "Médio") badgeDif.classList.add("badge-dificuldade-medio");
+            else badgeDif.classList.add("badge-dificuldade-dificil");
+
+            // Badges Conteúdos
+            const containerBadges = document.getElementById("desafio-badges-conteudo");
+            containerBadges.innerHTML = "";
+            desafioAtual.conteudos.forEach(c => {
+                const sp = document.createElement("span");
+                sp.className = "badge badge-topico";
+                sp.textContent = c;
+                containerBadges.appendChild(sp);
+            });
+
+            // Descrição e Requisitos
+            document.getElementById("desafio-descricao").textContent = desafioAtual.descricao;
+
+            const listaReq = document.getElementById("desafio-requisitos");
+            listaReq.innerHTML = "";
+            desafioAtual.requisitos.forEach(r => {
+                const li = document.createElement("li");
+                li.textContent = r;
+                listaReq.appendChild(li);
+            });
+
+            // Saída Esperada
+            const secaoExemplo = document.getElementById("secao-exemplo");
+            const boxExemplo = document.getElementById("desafio-exemplo");
+            const saida = desafioAtual.saidaEsperada || desafioAtual.exemplo;
+            if (saida) {
+                secaoExemplo.style.display = "block";
+                boxExemplo.textContent = saida;
+            } else {
+                secaoExemplo.style.display = "none";
+            }
+        }
+
+        // =========================================================================
+        // 2. COMEÇAR DESAFIO (INICIALIZAR TELA DE PROGRAMAÇÃO)
+        // =========================================================================
+        function comecarDesafio() {
+            if (!desafioAtual) return;
+
+            // Preenche dados do desafio no painel lateral de programação
+            document.getElementById("prog-titulo-resumo").textContent = desafioAtual.titulo;
+            document.getElementById("prog-painel-titulo").textContent = desafioAtual.titulo;
+
+            // Dificuldade e Badges no painel de programação
+            const badgeDif = document.getElementById("prog-painel-dificuldade");
+            badgeDif.textContent = desafioAtual.dificuldade;
+            badgeDif.className = "badge";
+            if (desafioAtual.dificuldade === "Fácil") badgeDif.classList.add("badge-dificuldade-facil");
+            else if (desafioAtual.dificuldade === "Médio") badgeDif.classList.add("badge-dificuldade-medio");
+            else badgeDif.classList.add("badge-dificuldade-dificil");
+
+            const containerBadges = document.getElementById("prog-painel-badges");
+            containerBadges.innerHTML = "";
+            desafioAtual.conteudos.forEach(c => {
+                const sp = document.createElement("span");
+                sp.className = "badge badge-topico";
+                sp.textContent = c;
+                containerBadges.appendChild(sp);
+            });
+
+            document.getElementById("prog-painel-descricao").textContent = desafioAtual.descricao;
+
+            const listaReq = document.getElementById("prog-painel-requisitos");
+            listaReq.innerHTML = "";
+            desafioAtual.requisitos.forEach(r => {
+                const li = document.createElement("li");
+                li.textContent = r;
+                listaReq.appendChild(li);
+            });
+
+            // Inicializa editor se estiver vazio
+            const editor = document.getElementById("editorCodigo");
+            if (!editor.value.trim()) {
+                editor.value = TEMPLATE_CODIGO_C;
+            }
+
+            bloquearConclusaoDesafio();
+
+            // Reseta terminal
+            document.getElementById("statusTexto").textContent = "Pronto";
+            document.getElementById("statusDot").className = "status-dot";
+            terminalPlaceholder.textContent = '> Clique em "EXECUTAR" para compilar e executar o código C.';
+
+            // Navega para a tela de programação
+            navegarPara('tela-programacao');
+
+            // Por padrão, abre direto na aba de CÓDIGO para começar a programar
+            setTimeout(() => {
+                trocarAba(1);
+            }, 100);
+        }
+
+        // =========================================================================
+        // 3. CONTROLE DE ABAS E SUPORTE A SWIPE
+        // =========================================================================
+        const swipeContainer = document.getElementById("swipeContainer");
+        const btnAbaDesafio = document.getElementById("btn-aba-desafio");
+        const btnAbaCodigo = document.getElementById("btn-aba-codigo");
+
+        function trocarAba(indice) {
+            const largura = swipeContainer.offsetWidth;
+            swipeContainer.scrollTo({
+                left: indice * largura,
+                behavior: 'smooth'
+            });
+            atualizarEstiloAbas(indice);
+        }
+
+        function atualizarEstiloAbas(indice) {
+            if (indice === 0) {
+                btnAbaDesafio.classList.add("ativa");
+                btnAbaCodigo.classList.remove("ativa");
+            } else {
+                btnAbaCodigo.classList.add("ativa");
+                btnAbaDesafio.classList.remove("ativa");
+            }
+        }
+
+        // Sincroniza o botão da aba com o swipe no celular
+        let debounceScroll = null;
+        swipeContainer.addEventListener("scroll", function() {
+            clearTimeout(debounceScroll);
+            debounceScroll = setTimeout(function() {
+                const scrollLeft = swipeContainer.scrollLeft;
+                const largura = swipeContainer.offsetWidth;
+                const indice = Math.round(scrollLeft / (largura || 1));
+                atualizarEstiloAbas(indice);
+            }, 50);
+        });
+
+        // =========================================================================
+        // 4. EDITOR DE CÓDIGO (INDENTAÇÃO COM TAB E RESET)
+        // =========================================================================
+        const editorCodigo = document.getElementById("editorCodigo");
+
+        // Permite usar a tecla TAB para inserir 4 espaços
+        editorCodigo.addEventListener("keydown", function(e) {
+            if (e.key === "Tab") {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const valor = this.value;
+
+                this.value = valor.substring(0, start) + "    " + valor.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+
+        function resetarCodigo() {
+            if (confirm("Deseja redefinir o código para o modelo inicial?")) {
+                editorCodigo.value = TEMPLATE_CODIGO_C;
+                bloquearConclusaoDesafio();
+            }
+        }
+
+        const btnConcluirDesafio = document.getElementById("btnConcluirDesafio");
+
+        function bloquearConclusaoDesafio() {
+            btnConcluirDesafio.disabled = true;
+        }
+
+        function liberarConclusaoDesafio() {
+            btnConcluirDesafio.disabled = false;
+        }
+
+        // Verificação básica: procura no código os elementos essenciais
+        // explicitamente pedidos pelo enunciado/requisitos.
+        // Esta etapa não substitui a futura análise completa por IA.
+        function verificarRequisitosBasicos(codigo) {
+            const textoRequisitos = (desafioAtual?.requisitos || []).join(" ").toLowerCase();
+            const faltantes = [];
+
+            const exigeArray = /\b(vetor|vetores|array|arrays|matriz|matrizes)\b/.test(textoRequisitos);
+            const temArray = /\b(?:int|float|double|char|long|short)\s+[a-z_]\w*\s*\[[^\]]*\]/i.test(codigo) || /\b[a-z_]\w*\s*\[[^\]]+\]/i.test(codigo);
+            if (exigeArray && !temArray) faltantes.push("um vetor/array/matriz");
+
+            const exigeFuncao = /\b(função|funcoes|funções|funcao|função própria|função auxiliar|funções auxiliares)\b/.test(textoRequisitos);
+            const temFuncao = /\b(?:int|float|double|char|void|long|short)\s+(?!main\b)[a-z_]\w*\s*\([^;{}]*\)\s*\{/i.test(codigo);
+            if (exigeFuncao && !temFuncao) faltantes.push("uma função auxiliar");
+
+            const exigeRepeticao = /\b(laço|laços|laco|laços|repetição|repeticao|loop|loops|for|while)\b/.test(textoRequisitos);
+            const temRepeticao = /\bfor\s*\(|\bwhile\s*\(/i.test(codigo);
+            if (exigeRepeticao && !temRepeticao) faltantes.push("uma estrutura de repetição");
+
+            const exigeCondicional = /\b(condicional|condicionais|if|else|decisão|decisao|decisões|decisoes)\b/.test(textoRequisitos);
+            const temCondicional = /\bif\s*\(/i.test(codigo);
+            if (exigeCondicional && !temCondicional) faltantes.push("uma estrutura condicional");
+
+            const exigeEntrada = /\b(entrada|entradas|ler|leitura|scanf)\b/.test(textoRequisitos);
+            const temEntrada = /\bscanf\s*\(/i.test(codigo);
+            if (exigeEntrada && !temEntrada) faltantes.push("leitura de entrada com scanf");
+
+            const exigeSaida = /\b(saída|saida|saídas|saidas|imprimir|impressão|impressao|printf)\b/.test(textoRequisitos);
+            const temSaida = /\bprintf\s*\(/i.test(codigo);
+            if (exigeSaida && !temSaida) faltantes.push("saída com printf");
+
+            const exigeStruct = /\b(struct|estrutura)\b/.test(textoRequisitos);
+            const temStruct = /\bstruct\s+[a-z_]\w*/i.test(codigo);
+            if (exigeStruct && !temStruct) faltantes.push("uma struct");
+
+            const exigeSwitch = /\b(switch|case)\b/.test(textoRequisitos);
+            const temSwitch = /\bswitch\s*\(/i.test(codigo);
+            if (exigeSwitch && !temSwitch) faltantes.push("uma estrutura switch/case");
+
+            const exigeDoWhile = /\b(do[- ]while|faça enquanto|faca enquanto)\b/.test(textoRequisitos);
+            const temDoWhile = /\bdo\s*\{/i.test(codigo) && /\bwhile\s*\(/i.test(codigo);
+            if (exigeDoWhile && !temDoWhile) faltantes.push("uma estrutura do-while");
+
+            return { passou: faltantes.length === 0, faltantes };
+        }
+
+        // Qualquer alteração depois de uma verificação invalida a liberação
+        // anterior até que o código seja executado/verificado novamente.
+        editorCodigo.addEventListener("input", function() {
+            bloquearConclusaoDesafio();
+        });
+
+        btnConcluirDesafio.addEventListener("click", analisarEConcluirDesafio);
+
+        async function analisarEConcluirDesafio() {
+            if (btnConcluirDesafio.disabled || analiseConclusaoEmAndamento || !desafioAtual) return;
+
+            const codigo = editorCodigo.value.trim();
+            if (!codigo) return;
+
+            analiseConclusaoEmAndamento = true;
+            btnConcluirDesafio.disabled = true;
+            btnConcluirDesafio.textContent = "⏳ ANALISANDO...";
+
+            const terminal = document.getElementById("terminalSaida");
+            const statusTexto = document.getElementById("statusTexto");
+            const statusDot = document.getElementById("statusDot");
+
+            terminal.textContent = "> Enviando o código para a análise avançada por IA...\n";
+            statusTexto.textContent = "Analisando...";
+            statusDot.className = "status-dot compilando";
+
+            try {
+                const resposta = await fetch("https://desafios-de-prog.onrender.com/analisar-codigo", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        desafio: {
+                            titulo: desafioAtual.titulo || "",
+                            descricao: desafioAtual.descricao || "",
+                            dificuldade: desafioAtual.dificuldade || "",
+                            conteudos: Array.isArray(desafioAtual.conteudos) ? desafioAtual.conteudos : [],
+                            requisitos: Array.isArray(desafioAtual.requisitos) ? desafioAtual.requisitos : [],
+                            entrada: desafioAtual.entrada || "",
+                            saida: desafioAtual.saida || "",
+                            saidaEsperada: desafioAtual.saidaEsperada || ""
+                        },
+                        codigo: codigo
+                    })
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok || !resultado.sucesso || !resultado.analise) {
+                    const detalhe = resultado.detalhes?.error?.message || resultado.detalhes?.message;
+                    throw new Error(detalhe || resultado.erro || "Não foi possível analisar o código.");
+                }
+
+                const analise = resultado.analise;
+                const linhas = [
+                    "> Análise avançada por IA",
+                    "",
+                    analise.aprovado
+                        ? "✓ A IA considerou que o desafio foi concluído."
+                        : "✗ A IA considerou que o desafio ainda não foi concluído.",
+                    ""
+                ];
+
+                if (Array.isArray(analise.requisitos) && analise.requisitos.length) {
+                    linhas.push("> Verificação dos requisitos");
+                    analise.requisitos.forEach(item => {
+                        linhas.push(
+                            (item.atendido ? "✓ " : "✗ ") +
+                            (item.descricao || "Requisito")
+                        );
+                        if (item.justificativa) {
+                            linhas.push("  " + item.justificativa);
+                        }
+                    });
+                    linhas.push("");
+                }
+
+                if (Array.isArray(analise.problemas) && analise.problemas.length) {
+                    linhas.push("> Problemas encontrados");
+                    analise.problemas.forEach(problema => {
+                        linhas.push("• " + problema);
+                    });
+                    linhas.push("");
+                }
+
+                if (analise.resumo) {
+                    linhas.push("> Resumo");
+                    linhas.push(analise.resumo);
+                }
+
+                terminal.textContent = linhas.join("\n");
+                statusTexto.textContent = analise.aprovado ? "Concluído" : "Reprovado";
+                statusDot.className = "status-dot";
+
+                if (desafioAtual._supabaseId) {
+                    await registrarAnaliseNoSupabase(analise);
+                }
+
+                if (analise.aprovado) {
+                    desafioAtual.status = "concluido";
+                    btnConcluirDesafio.textContent = "✓ DESAFIO CONCLUÍDO";
+                    btnConcluirDesafio.disabled = true;
+                } else {
+                    bloquearConclusaoDesafio();
+                    btnConcluirDesafio.textContent = "✓ CONCLUIR DESAFIO";
+                }
+
+            } catch (erro) {
+                console.error("Erro na análise avançada do desafio:", erro);
+                statusTexto.textContent = "Erro";
+                statusDot.className = "status-dot";
+                terminal.textContent = "Erro ao analisar o desafio:\n" + erro.message;
+                bloquearConclusaoDesafio();
+                btnConcluirDesafio.textContent = "✓ CONCLUIR DESAFIO";
+            } finally {
+                analiseConclusaoEmAndamento = false;
+            }
+        }
+
+        // =========================================================================
+        // 5. EXECUÇÃO DO CÓDIGO PELO ONECOMPILER EMBED
+        // =========================================================================
+        const oneCompilerTerminal = document.getElementById("oneCompilerTerminal");
+        const terminalPlaceholder = document.getElementById("terminalPlaceholder");
+        const terminalLoading = document.getElementById("terminalLoading");
+        let oneCompilerTerminalPronto = false;
+
+        function enviarCodigoParaOneCompilerTerminal(codigo) {
+            if (!oneCompilerTerminal?.contentWindow) return false;
+
+            oneCompilerTerminal.contentWindow.postMessage({
+                eventType: "populateCode",
+                language: "c",
+                files: [{ name: "main.c", content: codigo }]
+            }, "*");
+
+            oneCompilerTerminalPronto = true;
+            return true;
+        }
+
+        function executarNoOneCompilerTerminal(codigo) {
+            if (!oneCompilerTerminal?.contentWindow) {
+                return false;
+            }
+
+            enviarCodigoParaOneCompilerTerminal(codigo);
+            oneCompilerTerminal.contentWindow.postMessage({ eventType: "triggerRun" }, "*");
+            return true;
+        }
+
+        oneCompilerTerminal?.addEventListener("load", function() {
+            oneCompilerTerminalPronto = true;
+            const codigo = editorCodigo?.value || TEMPLATE_CODIGO_C;
+            enviarCodigoParaOneCompilerTerminal(codigo);
+        });
+
+        async function executarCodigoSimulado() {
+            const btn = document.getElementById("btnExecutar");
+            const statusTexto = document.getElementById("statusTexto");
+            const statusDot = document.getElementById("statusDot");
+            const codigo = editorCodigo.value;
+
+            if (!codigo.trim()) {
+                terminalPlaceholder.textContent = "> Erro: Nenhum código informado no editor.";
+                terminalPlaceholder.style.display = "block";
+                terminalLoading.style.display = "none";
+                statusTexto.textContent = "Erro";
+                statusDot.className = "status-dot";
+                bloquearConclusaoDesafio();
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = "⏳ EXECUTANDO...";
+            statusTexto.textContent = "Executando...";
+            statusDot.className = "status-dot compilando";
+
+            terminalPlaceholder.style.display = "none";
+            terminalLoading.style.display = "block";
+            terminalLoading.textContent = "> Enviando código para o OneCompiler...\n";
+
+            try {
+                const executou = executarNoOneCompilerTerminal(codigo);
+
+                if (!executou) {
+                    throw new Error("O terminal do OneCompiler ainda não está carregado. Tente novamente em alguns segundos.");
+                }
+
+                // O código é executado no OneCompiler Embed; a área visível abaixo é
+                // reservada para o Terminal/saída visual do próprio Embed.
+                await new Promise(resolve => setTimeout(resolve, 900));
+
+                terminalLoading.style.display = "none";
+                terminalPlaceholder.style.display = "none";
+                statusTexto.textContent = "Executado";
+                statusDot.className = "status-dot";
+
+                const verificacao = verificarRequisitosBasicos(codigo);
+                if (verificacao.passou) {
+                    liberarConclusaoDesafio();
+                } else {
+                    bloquearConclusaoDesafio();
+                }
+            } catch (erro) {
+                terminalLoading.style.display = "none";
+                terminalPlaceholder.textContent = "Erro ao executar o código:\n" + erro.message;
+                terminalPlaceholder.style.display = "block";
+                statusTexto.textContent = "Erro";
+                statusDot.className = "status-dot";
+                bloquearConclusaoDesafio();
+            } finally {
+                await registrarExecucaoNoSupabase();
+                btn.disabled = false;
+                btn.innerHTML = "▶ EXECUTAR";
+            }
+        }
+
+
+        // MENU RETRÁTIL
+        // =========================================================================
+        const menuRetratil = document.getElementById("menuRetratil");
+        const btnMenuRetratil = document.getElementById("btnMenuRetratil");
+
+        btnMenuRetratil.addEventListener("click", function(evento) {
+            evento.stopPropagation();
+            const aberta = menuRetratil.classList.toggle("aberta");
+            btnMenuRetratil.classList.toggle("aberta", aberta);
+            btnMenuRetratil.setAttribute("aria-expanded", String(aberta));
+        });
+
+        menuRetratil.querySelector(".painel-menu-retratil").addEventListener("click", function(evento) {
+            evento.stopPropagation();
+        });
+
+        // DESAFIOS — SUPABASE
+        // =========================================================================
+        const btnDesafios = document.getElementById("btnDesafios");
+        const desafiosContainer = document.getElementById("desafiosContainer");
+        const listaDesafios = document.getElementById("listaDesafios");
+        const editorCodigoPersistencia = document.getElementById("editorCodigo");
+        const selectDificuldadeWrapper = document.getElementById("selectDificuldadeWrapper");
+        const selectDificuldade = document.getElementById("dificuldade");
+        let timerSalvarCodigo = null;
+
+        async function atualizarListaDesafios() {
+            listaDesafios.innerHTML = "";
+
+            try {
+                const { data: usuarioAtual, error: erroUsuario } = await supabaseClient.auth.getUser();
+
+                if (erroUsuario) throw erroUsuario;
+
+                const usuario = usuarioAtual?.user;
+
+                if (!usuario) {
+                    const vazio = document.createElement("div");
+                    vazio.className = "desafio-salvo-vazio";
+                    vazio.textContent = "Entre na sua conta para ver seus desafios.";
+                    listaDesafios.appendChild(vazio);
+                    return;
+                }
+
+                const { data: desafios, error } = await supabaseClient
+                    .from("challenges")
+                    .select("id, titulo, descricao, dificuldade, conteudos, enunciado, requisitos, codigo_inicial, saida_esperada, codigo_usuario, status, execucoes, analises_ia, concluido_em, created_at")
+                    .eq("user_id", usuario.id)
+                    .order("created_at", { ascending: false });
+
+                if (error) throw error;
+
+                if (!Array.isArray(desafios) || desafios.length === 0) {
+                    const vazio = document.createElement("div");
+                    vazio.className = "desafio-salvo-vazio";
+                    vazio.textContent = "Nenhum desafio salvo.";
+                    listaDesafios.appendChild(vazio);
+                    return;
+                }
+
+                desafios.forEach(desafio => {
+                    const item = document.createElement("button");
+                    item.type = "button";
+                    item.className = "desafio-salvo-item";
+                    item.setAttribute("role", "menuitem");
+                    item.title = desafio.titulo || "Desafio de C";
+                    item.textContent = desafio.titulo || "Desafio de C";
+                    item.addEventListener("click", function(evento) {
+                        evento.stopPropagation();
+                        abrirDesafioSalvo(desafio.id);
+                    });
+                    listaDesafios.appendChild(item);
+                });
+            } catch (erro) {
+                console.error("Não foi possível carregar os desafios do Supabase:", erro);
+
+                const erroElemento = document.createElement("div");
+                erroElemento.className = "desafio-salvo-vazio";
+                erroElemento.textContent = "Não foi possível carregar seus desafios.";
+                listaDesafios.appendChild(erroElemento);
+            }
+        }
+
+        async function salvarCodigoDesafioNoSupabase(codigo) {
+            if (!desafioAtual || !desafioAtual._supabaseId) return;
+
+            try {
+                const { data: usuarioAtual, error: erroUsuario } = await supabaseClient.auth.getUser();
+
+                if (erroUsuario) throw erroUsuario;
+
+                const usuario = usuarioAtual?.user;
+                if (!usuario) return;
+
+                const { error } = await supabaseClient
+                    .from("challenges")
+                    .update({
+                        codigo_usuario: typeof codigo === "string" ? codigo : ""
+                    })
+                    .eq("id", desafioAtual._supabaseId)
+                    .eq("user_id", usuario.id);
+
+                if (error) throw error;
+            } catch (erro) {
+                console.error("Não foi possível salvar o código no Supabase:", erro);
+            }
+        }
+
+        function agendarSalvamentoCodigo() {
+            clearTimeout(timerSalvarCodigo);
+            timerSalvarCodigo = setTimeout(function() {
+                salvarCodigoDesafioNoSupabase(editorCodigoPersistencia.value);
+            }, 500);
+        }
+
+        async function registrarAnaliseNoSupabase(analise) {
+            if (!desafioAtual || !desafioAtual._supabaseId) return;
+
+            try {
+                const { data: usuarioAtual, error: erroUsuario } =
+                    await supabaseClient.auth.getUser();
+
+                if (erroUsuario) throw erroUsuario;
+
+                const usuario = usuarioAtual?.user;
+                if (!usuario) return;
+
+                const novasAnalises = Number(desafioAtual.analisesIA || 0) + 1;
+                const aprovado = analise?.aprovado === true;
+
+                const atualizacao = {
+                    codigo_usuario: editorCodigoPersistencia.value,
+                    analises_ia: novasAnalises,
+                    status: aprovado ? "concluido" : "em_andamento"
+                };
+
+                if (aprovado) {
+                    atualizacao.concluido_em = new Date().toISOString();
+                }
+
+                const { error } = await supabaseClient
+                    .from("challenges")
+                    .update(atualizacao)
+                    .eq("id", desafioAtual._supabaseId)
+                    .eq("user_id", usuario.id);
+
+                if (error) throw error;
+
+                desafioAtual.analisesIA = novasAnalises;
+                desafioAtual.status = aprovado ? "concluido" : "em_andamento";
+                if (aprovado) {
+                    desafioAtual.concluidoEm = atualizacao.concluido_em;
+                }
+
+                await atualizarListaDesafios();
+            } catch (erro) {
+                console.error("Não foi possível registrar a análise da IA no Supabase:", erro);
+            }
+        }
+
+        async function registrarExecucaoNoSupabase() {
+            if (!desafioAtual || !desafioAtual._supabaseId) return;
+
+            try {
+                const { data: usuarioAtual, error: erroUsuario } = await supabaseClient.auth.getUser();
+
+                if (erroUsuario) throw erroUsuario;
+
+                const usuario = usuarioAtual?.user;
+                if (!usuario) return;
+
+                const novasExecucoes = Number(desafioAtual.execucoes || 0) + 1;
+                const { error } = await supabaseClient
+                    .from("challenges")
+                    .update({
+                        codigo_usuario: editorCodigoPersistencia.value,
+                        execucoes: novasExecucoes,
+                        status: "em_andamento"
+                    })
+                    .eq("id", desafioAtual._supabaseId)
+                    .eq("user_id", usuario.id);
+
+                if (error) throw error;
+
+                desafioAtual.execucoes = novasExecucoes;
+                desafioAtual.status = "em_andamento";
+            } catch (erro) {
+                console.error("Não foi possível registrar a execução no Supabase:", erro);
+            }
+        }
+
+        async function abrirDesafioSalvo(id) {
+            try {
+                const { data: usuarioAtual, error: erroUsuario } = await supabaseClient.auth.getUser();
+
+                if (erroUsuario) throw erroUsuario;
+
+                const usuario = usuarioAtual?.user;
+                if (!usuario) {
+                    console.warn("Não é possível abrir o desafio sem usuário autenticado.");
+                    return;
+                }
+
+                const { data: desafioSalvo, error } = await supabaseClient
+                    .from("challenges")
+                    .select("id, titulo, descricao, dificuldade, conteudos, enunciado, requisitos, codigo_inicial, saida_esperada, codigo_usuario, status, execucoes, analises_ia, concluido_em, created_at")
+                    .eq("id", id)
+                    .eq("user_id", usuario.id)
+                    .single();
+
+                if (error) throw error;
+                if (!desafioSalvo) return;
+
+                desafioAtual = {
+                    dificuldade: desafioSalvo.dificuldade || "",
+                    conteudos: Array.isArray(desafioSalvo.conteudos) ? [...desafioSalvo.conteudos] : [],
+                    titulo: desafioSalvo.titulo || "Desafio de C",
+                    descricao: desafioSalvo.descricao || desafioSalvo.enunciado || "",
+                    requisitos: Array.isArray(desafioSalvo.requisitos) ? [...desafioSalvo.requisitos] : [],
+                    saidaEsperada: desafioSalvo.saida_esperada || "",
+                    entrada: "",
+                    saida: "",
+                    observacoes: "",
+                    _supabaseId: desafioSalvo.id,
+                    status: desafioSalvo.status || "em_andamento",
+                    execucoes: Number(desafioSalvo.execucoes || 0),
+                    analisesIA: Number(desafioSalvo.analises_ia || 0),
+                    concluidoEm: desafioSalvo.concluido_em || null
+                };
+
+                const codigoSalvo =
+                    typeof desafioSalvo.codigo_usuario === "string" && desafioSalvo.codigo_usuario
+                        ? desafioSalvo.codigo_usuario
+                        : (desafioSalvo.codigo_inicial || "");
+
+                editorCodigoPersistencia.value = codigoSalvo;
+                renderizarDetalhesDesafio();
+                comecarDesafio();
+                editorCodigoPersistencia.value = codigoSalvo;
+                menuRetratil.classList.remove("aberta");
+                btnMenuRetratil.classList.remove("aberta");
+                btnMenuRetratil.setAttribute("aria-expanded", "false");
+                desafiosContainer.classList.remove("aberta");
+                btnDesafios.classList.remove("aberta");
+                btnDesafios.setAttribute("aria-expanded", "false");
+                await atualizarListaDesafios();
+            } catch (erro) {
+                console.error("Não foi possível abrir o desafio do Supabase:", erro);
+            }
+        }
+
+        btnDesafios.addEventListener("click", function(evento) {
+            evento.stopPropagation();
+            const aberta = desafiosContainer.classList.toggle("aberta");
+            btnDesafios.classList.toggle("aberta", aberta);
+            btnDesafios.setAttribute("aria-expanded", String(aberta));
+            if (aberta) atualizarListaDesafios();
+        });
+
+        listaDesafios.addEventListener("click", function(evento) {
+            evento.stopPropagation();
+        });
+
+        document.addEventListener("click", function() {
+            fecharMenuConta();
+            menuRetratil.classList.remove("aberta");
+            btnMenuRetratil.classList.remove("aberta");
+            btnMenuRetratil.setAttribute("aria-expanded", "false");
+            desafiosContainer.classList.remove("aberta");
+            btnDesafios.classList.remove("aberta");
+            btnDesafios.setAttribute("aria-expanded", "false");
+        });
+
+        editorCodigoPersistencia.addEventListener("input", function() {
+            if (desafioAtual) agendarSalvamentoCodigo();
+        });
+
+        editorCodigoPersistencia.addEventListener("blur", function() {
+            if (desafioAtual) {
+                clearTimeout(timerSalvarCodigo);
+                salvarCodigoDesafioNoSupabase(this.value);
+            }
+        });
+
+        // A lista de desafios é carregada depois que o cliente Supabase é inicializado.
+
+        // Seta da dificuldade: um único elemento gira no próprio centro.
+        // O clique alterna entre aberta e fechada, inclusive ao clicar novamente no próprio campo.
+        selectDificuldade.addEventListener("click", function() {
+            const aberta = selectDificuldadeWrapper.classList.toggle("aberta");
+            selectDificuldade.setAttribute("aria-expanded", String(aberta));
+        });
+
+        selectDificuldade.addEventListener("change", function() {
+            selectDificuldadeWrapper.classList.remove("aberta");
+            selectDificuldade.setAttribute("aria-expanded", "false");
+        });
+
+        selectDificuldade.addEventListener("blur", function() {
+            selectDificuldadeWrapper.classList.remove("aberta");
+            selectDificuldade.setAttribute("aria-expanded", "false");
+        });
+
+        selectDificuldade.addEventListener("keydown", function(evento) {
+            if (evento.key === "Escape") {
+                selectDificuldadeWrapper.classList.remove("aberta");
+                selectDificuldade.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        // =========================================================================
+        // CONTA / LOGIN — SUPABASE AUTH
+        // =========================================================================
+        const SUPABASE_URL = "https://kfititfljepttdnkcvwi.supabase.co";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_TPxLVOx45ROgxpsTCa6c5Q_VYR-UsEi";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+        // Carrega a lista somente após o cliente Supabase estar inicializado.
+        atualizarListaDesafios();
+
+        async function salvarDesafioNoSupabase(desafio) {
+            if (!desafio) return null;
+
+            try {
+                const { data: usuarioAtual, error: erroUsuario } = await supabaseClient.auth.getUser();
+
+                if (erroUsuario) {
+                    throw erroUsuario;
+                }
+
+                const usuario = usuarioAtual?.user;
+
+                if (!usuario) {
+                    console.warn("Desafio gerado sem usuário autenticado. O desafio não foi salvo no Supabase.");
+                    return null;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from("challenges")
+                    .insert({
+                        user_id: usuario.id,
+                        titulo: desafio.titulo || "Desafio de C",
+                        descricao: desafio.descricao || "",
+                        dificuldade: desafio.dificuldade || "",
+                        conteudos: Array.isArray(desafio.conteudos) ? desafio.conteudos : [],
+                        enunciado: desafio.descricao || "",
+                        requisitos: Array.isArray(desafio.requisitos) ? desafio.requisitos : [],
+                        codigo_inicial: TEMPLATE_CODIGO_C,
+                        saida_esperada: desafio.saidaEsperada || "",
+                        codigo_usuario: "",
+                        status: "em_andamento",
+                        execucoes: 0,
+                        analises_ia: 0
+                    })
+                    .select("id")
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                desafio._supabaseId = data.id;
+                return data;
+
+            } catch (erro) {
+                console.error("Não foi possível salvar o desafio no Supabase:", erro);
+                return null;
+            }
+        }
+
+        const contaContainer = document.getElementById("contaContainer");
+        const btnConta = document.getElementById("btnConta");
+        const menuConta = document.getElementById("menuConta");
+        const btnFazerLogin = document.getElementById("btnFazerLogin");
+        const estadoContaLogada = document.getElementById("estadoContaLogada");
+        const btnEncerrarSessao = document.getElementById("btnEncerrarSessao");
+        const modalContaOverlay = document.getElementById("modalContaOverlay");
+        const fecharModalConta = document.getElementById("fecharModalConta");
+        const telaLoginConta = document.getElementById("telaLoginConta");
+        const telaCadastroConta = document.getElementById("telaCadastroConta");
+        const telaRecuperacaoConta = document.getElementById("telaRecuperacaoConta");
+        const telaRedefinirConta = document.getElementById("telaRedefinirConta");
+        const mensagemConta = document.getElementById("mensagemConta");
+
+        let sessaoAtual = null;
+
+        function mostrarMensagemConta(texto, tipo = "info") {
+            mensagemConta.textContent = texto;
+            mensagemConta.style.display = texto ? "block" : "none";
+            mensagemConta.style.color = tipo === "erro" ? "#f87171" : "#8b949e";
+        }
+
+        function fecharMenuConta() {
+            contaContainer.classList.remove("aberta");
+            btnConta.classList.remove("aberta");
+            btnConta.setAttribute("aria-expanded", "false");
+        }
+
+        function abrirMenuConta() {
+            contaContainer.classList.add("aberta");
+            btnConta.classList.add("aberta");
+            btnConta.setAttribute("aria-expanded", "true");
+        }
+
+        function atualizarMenuConta() {
+            const logado = !!sessaoAtual;
+            btnFazerLogin.style.display = logado ? "none" : "block";
+            estadoContaLogada.style.display = logado ? "block" : "none";
+        }
+
+        function mostrarTelaConta(tela) {
+            telaLoginConta.style.display = tela === "login" ? "block" : "none";
+            telaCadastroConta.style.display = tela === "cadastro" ? "block" : "none";
+            telaRecuperacaoConta.style.display = tela === "recuperacao" ? "block" : "none";
+            telaRedefinirConta.style.display = tela === "redefinir" ? "block" : "none";
+            mostrarMensagemConta("");
+        }
+
+        function abrirModalConta(tela = "login") {
+            fecharMenuConta();
+            mostrarTelaConta(tela);
+            modalContaOverlay.classList.add("aberta");
+            modalContaOverlay.setAttribute("aria-hidden", "false");
+        }
+
+        function fecharModalContaVisual() {
+            modalContaOverlay.classList.remove("aberta");
+            modalContaOverlay.setAttribute("aria-hidden", "true");
+            mostrarMensagemConta("");
+        }
+
+        btnConta.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const aberta = contaContainer.classList.contains("aberta");
+            if (aberta) fecharMenuConta();
+            else abrirMenuConta();
+        });
+
+        menuConta.addEventListener("click", function(e) { e.stopPropagation(); });
+
+        btnFazerLogin.addEventListener("click", function() { abrirModalConta("login"); });
+
+        document.getElementById("btnMostrarCadastro").addEventListener("click", function() {
+            mostrarTelaConta("cadastro");
+        });
+
+        document.getElementById("btnVoltarLogin").addEventListener("click", function() {
+            mostrarTelaConta("login");
+        });
+
+        document.getElementById("btnEsqueciSenha").addEventListener("click", function() {
+            mostrarTelaConta("recuperacao");
+        });
+
+        document.getElementById("btnVoltarLoginRecuperacao").addEventListener("click", function() {
+            mostrarTelaConta("login");
+        });
+
+        document.getElementById("btnVoltarLoginRedefinir").addEventListener("click", function() {
+            mostrarTelaConta("login");
+        });
+
+        document.getElementById("btnRedefinirSenha").addEventListener("click", async function() {
+            const senha = document.getElementById("novaSenhaVisual").value;
+            const confirmacao = document.getElementById("confirmarNovaSenhaVisual").value;
+            if (!senha || !confirmacao) return mostrarMensagemConta("Preencha os dois campos de senha.", "erro");
+            if (senha !== confirmacao) return mostrarMensagemConta("As senhas não coincidem.", "erro");
+            const { error } = await supabaseClient.auth.updateUser({ password: senha });
+            if (error) return mostrarMensagemConta(error.message, "erro");
+            document.getElementById("novaSenhaVisual").value = "";
+            document.getElementById("confirmarNovaSenhaVisual").value = "";
+            mostrarMensagemConta("Senha alterada com sucesso!", "sucesso");
+            setTimeout(function() {
+                mostrarTelaConta("login");
+            }, 1200);
+        });
+
+        fecharModalConta.addEventListener("click", fecharModalContaVisual);
+        modalContaOverlay.addEventListener("click", function(e) {
+            if (e.target === modalContaOverlay) fecharModalContaVisual();
+        });
+
+        document.getElementById("btnEntrarConta").addEventListener("click", async function() {
+            const email = document.getElementById("loginEmailVisual").value.trim();
+            const senha = document.getElementById("loginSenhaVisual").value;
+            if (!email || !senha) return mostrarMensagemConta("Preencha o e-mail e a senha.", "erro");
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+            if (error) return mostrarMensagemConta(error.message, "erro");
+            sessaoAtual = data.session;
+            atualizarMenuConta();
+            fecharModalContaVisual();
+        });
+
+        document.getElementById("btnCadastrarConta").addEventListener("click", async function() {
+            const nomeUsuario = document.getElementById("cadastroNomeUsuarioVisual").value.trim();
+            const email = document.getElementById("cadastroEmailVisual").value.trim();
+            const senha = document.getElementById("cadastroSenhaVisual").value;
+            const confirmacao = document.getElementById("cadastroConfirmacaoVisual").value;
+            if (!nomeUsuario || !email || !senha || !confirmacao) return mostrarMensagemConta("Preencha todos os campos.", "erro");
+            if (senha !== confirmacao) return mostrarMensagemConta("As senhas não coincidem.", "erro");
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password: senha,
+                options: {
+                    emailRedirectTo: "https://kauansarmanho.github.io/Desafios-de-prog/",
+                    data: { username: nomeUsuario, nome_usuario: nomeUsuario }
+                }
+            });
+            if (error) return mostrarMensagemConta(error.message, "erro");
+            if (data.session) {
+                sessaoAtual = data.session;
+                atualizarMenuConta();
+                fecharModalContaVisual();
+            } else {
+                mostrarMensagemConta("Cadastro realizado! Verifique seu e-mail para confirmar a conta.");
+            }
+        });
+
+        document.getElementById("btnEnviarRecuperacao").addEventListener("click", async function() {
+            const email = document.getElementById("recuperacaoEmailVisual").value.trim();
+            if (!email) return mostrarMensagemConta("Informe seu e-mail.", "erro");
+            const redirectTo = window.location.origin + window.location.pathname;
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+            if (error) return mostrarMensagemConta(error.message, "erro");
+            mostrarMensagemConta("Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha.");
+        });
+
+        btnEncerrarSessao.addEventListener("click", async function() {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) return;
+            sessaoAtual = null;
+            atualizarMenuConta();
+            fecharMenuConta();
+        });
+
+        const modalInformacoesContaOverlay = document.getElementById("modalInformacoesContaOverlay");
+        const conteudoInfoConta = document.getElementById("conteudoInfoConta");
+        const fecharModalInformacoesConta = document.getElementById("fecharModalInformacoesConta");
+        const itensInfoConta = document.querySelectorAll(".item-info-conta");
+
+        function fecharModalInformacoesContaVisual() {
+            modalInformacoesContaOverlay.classList.remove("aberta");
+            modalInformacoesContaOverlay.setAttribute("aria-hidden", "true");
+        }
+
+        function formatarDataConta(data) {
+            if (!data) return "Não disponível";
+            const d = new Date(data);
+            if (Number.isNaN(d.getTime())) return "Não disponível";
+            return d.toLocaleDateString("pt-BR");
+        }
+
+        async function carregarPerfilConta() {
+            if (!sessaoAtual || !sessaoAtual.user) return null;
+            const { data, error } = await supabaseClient
+                .from("profiles")
+                .select("username, created_at")
+                .eq("id", sessaoAtual.user.id)
+                .maybeSingle();
+
+            if (error) {
+                console.error("Erro ao carregar perfil:", error);
+                return null;
+            }
+            return data;
+        }
+
+        function renderizarSecaoInfoConta(secao, dados) {
+            const user = sessaoAtual && sessaoAtual.user ? sessaoAtual.user : null;
+            if (!user) return;
+
+            if (secao === "perfil") {
+                const username = dados && dados.username ? dados.username : (user.user_metadata?.username || "Não informado");
+                const email = user.email || "Não informado";
+                conteudoInfoConta.innerHTML = `
+                    <h3>Perfil</h3>
+                    <div class="info-conta-campo">
+                        <span class="info-conta-rotulo">Nome de usuário</span>
+                        <div class="info-conta-valor-linha">
+                            <span class="info-conta-valor" id="valorUsernameInfo">${username}</span>
+                            <button class="btn-editar-info-conta" id="editarUsernameInfo" type="button" aria-label="Editar nome de usuário"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5z"></path>
+    <path d="M14.3 6.7l3.5 3.5"></path>
+</svg></button>
+                        </div>
+                    </div>
+                    <div class="info-conta-campo">
+                        <span class="info-conta-rotulo">E-mail</span>
+                        <div class="info-conta-valor-linha">
+                            <span class="info-conta-valor">${email}</span>
+                            <button class="btn-editar-info-conta" id="editarEmailInfo" type="button" aria-label="Editar e-mail"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5z"></path>
+    <path d="M14.3 6.7l3.5 3.5"></path>
+</svg></button>
+                        </div>
+                    </div>
+                    <div id="mensagemPerfilInfo" class="mensagem-info-conta" style="display:none;"></div>
+                `;
+
+                document.getElementById("editarUsernameInfo").addEventListener("click", function() {
+                    const valor = document.getElementById("valorUsernameInfo").textContent;
+                    conteudoInfoConta.innerHTML = `
+                        <h3>Alterar nome de usuário</h3>
+                        <div class="info-conta-edicao">
+                            <span class="info-conta-rotulo">Novo nome de usuário</span>
+                            <input id="novoUsernameInfo" type="text" value="${valor.replace(/"/g, "&quot;")}" autocomplete="username">
+                            <div id="mensagemEdicaoInfo" class="mensagem-info-conta" style="display:none;"></div>
+                            <div class="info-conta-acoes">
+                                <button id="cancelarEdicaoInfo" class="btn-info-conta-secundario" type="button">Cancelar</button>
+                                <button id="salvarUsernameInfo" class="btn-info-conta-principal" type="button">Salvar</button>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById("cancelarEdicaoInfo").addEventListener("click", function() {
+                        renderizarSecaoInfoConta("perfil", dados);
+                    });
+                    document.getElementById("salvarUsernameInfo").addEventListener("click", async function() {
+                        const novo = document.getElementById("novoUsernameInfo").value.trim();
+                        const msg = document.getElementById("mensagemEdicaoInfo");
+                        if (!novo) {
+                            msg.textContent = "Informe um nome de usuário.";
+                            msg.style.display = "block";
+                            return;
+                        }
+                        const { error } = await supabaseClient
+                            .from("profiles")
+                            .update({ username: novo })
+                            .eq("id", user.id);
+                        if (error) {
+                            msg.textContent = error.code === "23505"
+                                ? "Esse nome de usuário já está em uso."
+                                : error.message;
+                            msg.style.display = "block";
+                            return;
+                        }
+                        dados.username = novo;
+                        if (user.user_metadata) user.user_metadata.username = novo;
+                        renderizarSecaoInfoConta("perfil", dados);
+                    });
+                });
+
+                document.getElementById("editarEmailInfo").addEventListener("click", function() {
+                    conteudoInfoConta.innerHTML = `
+                        <h3>Alterar e-mail</h3>
+                        <div class="info-conta-edicao">
+                            <span class="info-conta-rotulo">Novo e-mail</span>
+                            <input id="novoEmailInfo" type="email" placeholder="novo@email.com" autocomplete="email">
+                            <div id="mensagemEdicaoInfo" class="mensagem-info-conta" style="display:none;"></div>
+                            <div class="info-conta-acoes">
+                                <button id="cancelarEdicaoInfo" class="btn-info-conta-secundario" type="button">Cancelar</button>
+                                <button id="salvarEmailInfo" class="btn-info-conta-principal" type="button">Salvar</button>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById("cancelarEdicaoInfo").addEventListener("click", function() {
+                        renderizarSecaoInfoConta("perfil", dados);
+                    });
+                    document.getElementById("salvarEmailInfo").addEventListener("click", async function() {
+                        const novo = document.getElementById("novoEmailInfo").value.trim();
+                        const msg = document.getElementById("mensagemEdicaoInfo");
+                        if (!novo) {
+                            msg.textContent = "Informe o novo e-mail.";
+                            msg.style.display = "block";
+                            return;
+                        }
+                        if (novo.toLowerCase() === String(user.email || "").toLowerCase()) {
+                            msg.textContent = "Informe um e-mail diferente do atual.";
+                            msg.style.display = "block";
+                            return;
+                        }
+                        const { error } = await supabaseClient.auth.updateUser({ email: novo });
+                        if (error) {
+                            msg.textContent = error.message;
+                            msg.style.display = "block";
+                            return;
+                        }
+                        msg.textContent = "Enviamos um link de confirmação para o novo e-mail.";
+                        msg.style.display = "block";
+                        document.getElementById("novoEmailInfo").value = "";
+                    });
+                });
+                return;
+            }
+
+            if (secao === "seguranca") {
+                conteudoInfoConta.innerHTML = `
+                    <h3>Segurança</h3>
+                    <div class="info-conta-campo">
+                        <span class="info-conta-rotulo">Senha</span>
+                        <button id="abrirAlterarSenhaInfo" class="btn-alterar-senha-conta" type="button">Alterar senha</button>
+                    </div>
+                    <div id="mensagemSegurancaInfo" class="mensagem-info-conta" style="display:none;"></div>
+                `;
+                document.getElementById("abrirAlterarSenhaInfo").addEventListener("click", function() {
+                    conteudoInfoConta.innerHTML = `
+                        <h3>Alterar senha</h3>
+                        <div class="campo-conta-modal campo-senha">
+                            <label for="senhaAtualInfo">Senha atual</label>
+                            <input id="senhaAtualInfo" type="password" placeholder="Digite sua senha atual" autocomplete="current-password">
+                            <button class="btn-olho-senha" type="button" data-target="senhaAtualInfo" aria-label="Mostrar senha">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                            </button>
+                        </div>
+                        <div class="campo-conta-modal campo-senha">
+                            <label for="novaSenhaInfo">Nova senha</label>
+                            <input id="novaSenhaInfo" type="password" placeholder="Digite a nova senha" autocomplete="new-password">
+                            <button class="btn-olho-senha" type="button" data-target="novaSenhaInfo" aria-label="Mostrar senha">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                            </button>
+                        </div>
+                        <div class="campo-conta-modal campo-senha">
+                            <label for="confirmarSenhaInfo">Confirmar nova senha</label>
+                            <input id="confirmarSenhaInfo" type="password" placeholder="Repita a nova senha" autocomplete="new-password">
+                            <button class="btn-olho-senha" type="button" data-target="confirmarSenhaInfo" aria-label="Mostrar senha">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+                            </button>
+                        </div>
+                        <div id="mensagemSenhaInfo" class="mensagem-info-conta" style="display:none;"></div>
+                        <div class="info-conta-acoes">
+                            <button id="cancelarSenhaInfo" class="btn-info-conta-secundario" type="button">Cancelar</button>
+                            <button id="salvarSenhaInfo" class="btn-info-conta-principal" type="button">Salvar nova senha</button>
+                        </div>
+                    `;
+
+                    document.querySelectorAll("#conteudoInfoConta .btn-olho-senha").forEach(function(botao) {
+                        botao.addEventListener("click", function() {
+                            const campo = document.getElementById(botao.dataset.target);
+                            const mostrando = campo.type === "text";
+                            campo.type = mostrando ? "password" : "text";
+                            botao.setAttribute("aria-label", mostrando ? "Mostrar senha" : "Ocultar senha");
+                            botao.innerHTML = mostrando
+                                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>'
+                                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 3.8"/><path d="M6.6 6.7C3.6 8.7 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.1-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+                        });
+                    });
+
+                    document.getElementById("cancelarSenhaInfo").addEventListener("click", function() {
+                        renderizarSecaoInfoConta("seguranca", dados);
+                    });
+
+                    document.getElementById("salvarSenhaInfo").addEventListener("click", async function() {
+                        const atual = document.getElementById("senhaAtualInfo").value;
+                        const nova = document.getElementById("novaSenhaInfo").value;
+                        const confirmacao = document.getElementById("confirmarSenhaInfo").value;
+                        const msg = document.getElementById("mensagemSenhaInfo");
+                        if (!atual || !nova || !confirmacao) {
+                            msg.textContent = "Preencha todos os campos.";
+                            msg.style.display = "block";
+                            return;
+                        }
+                        if (nova !== confirmacao) {
+                            msg.textContent = "As novas senhas não coincidem.";
+                            msg.style.display = "block";
+                            return;
+                        }
+                        if (nova === atual) {
+                            msg.textContent = "A nova senha deve ser diferente da senha atual.";
+                            msg.style.display = "block";
+                            return;
+                        }
+
+                        const emailConta = String(user.email || "").trim();
+                        if (!emailConta) {
+                            msg.textContent = "Não foi possível identificar o e-mail da conta.";
+                            msg.style.display = "block";
+                            return;
+                        }
+
+                        msg.textContent = "Verificando a senha atual...";
+                        msg.style.display = "block";
+
+                        // Primeiro confirma a senha atual usando o login do próprio Supabase.
+                        // Assim a senha nova só será enviada se a senha atual estiver correta.
+                        const { error: erroVerificacao } = await supabaseClient.auth.signInWithPassword({
+                            email: emailConta,
+                            password: atual
+                        });
+                        if (erroVerificacao) {
+                            msg.textContent = "A senha atual está incorreta.";
+                            msg.style.display = "block";
+                            return;
+                        }
+
+                        msg.textContent = "Alterando sua senha...";
+                        msg.style.display = "block";
+
+                        // Altera a senha diretamente no Supabase Auth.
+                        const { error: erroAlteracao } = await supabaseClient.auth.updateUser({
+                            password: nova,
+                            current_password: atual
+                        });
+                        if (erroAlteracao) {
+                            msg.textContent = erroAlteracao.message;
+                            msg.style.display = "block";
+                            return;
+                        }
+
+                        // Confirma de verdade que a senha nova pode ser usada para entrar.
+                        // Só mostramos sucesso depois dessa segunda validação.
+                        const { error: erroConfirmacao } = await supabaseClient.auth.signInWithPassword({
+                            email: emailConta,
+                            password: nova
+                        });
+                        if (erroConfirmacao) {
+                            msg.textContent = "A senha foi alterada, mas não foi possível confirmar o novo login. Tente entrar novamente.";
+                            msg.style.display = "block";
+                            return;
+                        }
+
+                        msg.textContent = "Senha alterada com sucesso! A nova senha já pode ser usada para entrar.";
+                        msg.style.display = "block";
+                        document.getElementById("senhaAtualInfo").value = "";
+                        document.getElementById("novaSenhaInfo").value = "";
+                        document.getElementById("confirmarSenhaInfo").value = "";
+                    });
+                });
+                return;
+            }
+
+            if (secao === "conta") {
+                const confirmado = !!user.email_confirmed_at;
+                conteudoInfoConta.innerHTML = `
+                    <h3>Conta</h3>
+                    <div class="info-conta-campo">
+                        <span class="info-conta-rotulo">Conta criada em</span>
+                        <span class="info-conta-valor">${formatarDataConta(user.created_at)}</span>
+                    </div>
+                    <div class="info-conta-campo">
+                        <span class="info-conta-rotulo">E-mail confirmado</span>
+                        <span class="info-conta-status ${confirmado ? "ok" : "pendente"}">${confirmado ? "✓ Sim" : "⚠ Ainda não confirmado"}</span>
+                    </div>
+                `;
+                return;
+            }
+
+            if (secao === "progresso") {
+                conteudoInfoConta.innerHTML = `
+                    <h3>Progresso</h3>
+                    <div class="progresso-info-conta">
+                        <div class="progresso-info-item"><span>Desafios concluídos</span><span>0</span></div>
+                        <div class="progresso-info-item"><span>Desafios em andamento</span><span>0</span></div>
+                        <div class="progresso-info-item"><span>Taxa de conclusão</span><span>0%</span></div>
+                        <div class="progresso-info-item"><span>Pontuação</span><span>0</span></div>
+                    </div>
+                    <p class="texto-conta-secundario" style="text-align:left;">Esses dados serão preenchidos quando o sistema de progresso dos desafios for implementado.</p>
+                `;
+            }
+        }
+
+        async function abrirModalInformacoesConta() {
+            if (!sessaoAtual || !sessaoAtual.user) return;
+            fecharMenuConta();
+            modalInformacoesContaOverlay.classList.add("aberta");
+            modalInformacoesContaOverlay.setAttribute("aria-hidden", "false");
+            itensInfoConta.forEach(function(item) {
+                item.classList.toggle("ativo", item.dataset.infoSecao === "perfil");
+            });
+            conteudoInfoConta.innerHTML = '<p class="texto-conta-secundario" style="text-align:left;">Carregando informações...</p>';
+            const dados = await carregarPerfilConta();
+            renderizarSecaoInfoConta("perfil", dados || {});
+        }
+
+        itensInfoConta.forEach(function(item) {
+            item.addEventListener("click", async function() {
+                itensInfoConta.forEach(function(outro) { outro.classList.remove("ativo"); });
+                item.classList.add("ativo");
+                const dados = await carregarPerfilConta();
+                renderizarSecaoInfoConta(item.dataset.infoSecao, dados || {});
+            });
+        });
+
+        document.getElementById("btnInformacoesConta").addEventListener("click", abrirModalInformacoesConta);
+        fecharModalInformacoesConta.addEventListener("click", fecharModalInformacoesContaVisual);
+        modalInformacoesContaOverlay.addEventListener("click", function(e) {
+            if (e.target === modalInformacoesContaOverlay) fecharModalInformacoesContaVisual();
+        });
+
+
+        supabaseClient.auth.onAuthStateChange(function(evento, session) {
+            sessaoAtual = session;
+            atualizarMenuConta();
+
+            if (evento === "PASSWORD_RECOVERY") {
+                abrirModalConta("redefinir");
+                mostrarMensagemConta("Defina sua nova senha após abrir o link de recuperação.");
+            }
+        });
+
+        (async function inicializarAuth() {
+            const { data } = await supabaseClient.auth.getSession();
+            sessaoAtual = data.session;
+            atualizarMenuConta();
+        })();
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                fecharMenuConta();
+                fecharModalContaVisual();
+                fecharModalInformacoesContaVisual();
+            }
+        });
+
+        // =========================================================================
+        // BOTÃO DE AJUDA
+        // =========================================================================
+        const btnAjuda = document.getElementById("btnAjuda");
+        const janelaAjuda = document.getElementById("janelaAjuda");
+
+        btnAjuda.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const aberta = janelaAjuda.classList.toggle("aberta");
+            btnAjuda.classList.toggle("aberta", aberta);
+            btnAjuda.setAttribute("aria-expanded", String(aberta));
+        });
+
+        janelaAjuda.addEventListener("click", function(e) {
+            e.stopPropagation();
+        });
+
+        document.addEventListener("click", function() {
+            janelaAjuda.classList.remove("aberta");
+            btnAjuda.classList.remove("aberta");
+            btnAjuda.setAttribute("aria-expanded", "false");
+        });
+
+        // Mostrar/ocultar senha nos campos de login e cadastro
+        document.querySelectorAll(".btn-olho-senha").forEach(function(botao) {
+            botao.addEventListener("click", function() {
+                const campo = document.getElementById(botao.dataset.target);
+                const mostrando = campo.type === "text";
+                campo.type = mostrando ? "password" : "text";
+                botao.setAttribute("aria-label", mostrando ? "Mostrar senha" : "Ocultar senha");
+                botao.innerHTML = mostrando
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 3.8"/><path d="M6.6 6.7C3.6 8.7 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.1-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+            });
+        });
+
+    </script>
+
+</body>
+</html>
