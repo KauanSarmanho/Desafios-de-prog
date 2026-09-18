@@ -70,12 +70,18 @@ app.get("/testar-ia", async (req, res) => {
     }
 });
 
+
+/* ============================================================
+   GERAR DESAFIO
+   ============================================================ */
+
 app.post("/gerar-desafio", async (req, res) => {
     try {
         const {
             tema,
             dificuldade,
-            linguagem
+            linguagem,
+            conteudos
         } = req.body;
 
         if (!OPENROUTER_API_KEY) {
@@ -85,24 +91,116 @@ app.post("/gerar-desafio", async (req, res) => {
             });
         }
 
+        const conteudosLista = Array.isArray(conteudos)
+            ? conteudos
+            : [];
+
+        const conteudosTexto = conteudosLista.length > 0
+            ? conteudosLista.join(", ")
+            : (tema || "programação");
+
         const prompt = `
-Crie um desafio de programação.
+Você é um gerador especializado de desafios de programação em linguagem C.
 
-Tema: ${tema || "programação"}
-Dificuldade: ${dificuldade || "iniciante"}
-Linguagem: ${linguagem || "C"}
+Sua tarefa é criar UM único desafio de programação que seja interessante, coerente, prático e compatível com o nível de dificuldade informado.
 
-Retorne somente um JSON válido no seguinte formato:
+Dificuldade:
+${dificuldade || "iniciante"}
 
-{
-  "titulo": "Título do desafio",
-  "descricao": "Descrição detalhada do problema",
-  "entrada": "Descrição da entrada",
-  "saida": "Descrição da saída",
-  "exemploEntrada": "Exemplo de entrada",
-  "exemploSaida": "Exemplo de saída",
-  "restricoes": "Restrições do problema"
-}
+Conteúdos obrigatórios:
+${conteudosTexto}
+
+======================================================
+REGRAS FUNDAMENTAIS
+======================================================
+
+1. TODOS os conteúdos informados são obrigatórios.
+
+2. O desafio deve ser construído de forma que cada conteúdo tenha uma função REAL e relevante na solução.
+
+3. NÃO inclua um conteúdo apenas de forma superficial para dizer que ele foi utilizado.
+
+4. Os conteúdos devem estar integrados naturalmente ao problema. O desafio deve fazer sentido mesmo quando vários conteúdos são usados juntos.
+
+5. Sempre que possível, faça com que os conteúdos se complementem. Por exemplo, se houver Struct e Ponteiros, o problema deve criar uma situação em que trabalhar com estruturas por meio de funções e ponteiros seja naturalmente útil.
+
+6. Se houver Array e String, o problema deve exigir manipulação relevante de conjuntos de dados e textos, e não apenas uma declaração isolada.
+
+7. Se houver Função, o problema deve possuir operações que façam sentido separar em funções.
+
+8. Se houver If-Else, devem existir decisões ou regras de negócio que dependam de condições.
+
+9. Se houver For, deve existir processamento repetitivo que seja realmente necessário para resolver o problema.
+
+10. Se houver conteúdos mais avançados, como Struct, Ponteiros ou outros, o desafio deve criar uma situação que justifique seu uso.
+
+11. Não transforme o desafio em uma lista artificial de tarefas só para encaixar os conteúdos.
+
+12. O problema deve ter uma situação ou objetivo claro, preferencialmente semelhante a uma situação prática do mundo real, sempre que isso combinar com os conteúdos selecionados.
+
+13. A dificuldade deve ser compatível com a quantidade e o nível dos conteúdos selecionados.
+
+14. Quanto maior a dificuldade, mais integrada e elaborada pode ser a lógica do problema, sem exigir conteúdos que não foram selecionados.
+
+15. O enunciado deve permitir que outra IA consiga verificar posteriormente se os requisitos foram realmente cumpridos.
+
+16. Os requisitos devem ser CONCRETOS e VERIFICÁVEIS. Evite requisitos vagos como "use corretamente as variáveis" ou "faça um bom programa".
+
+17. Quando um conteúdo puder ser especificado de maneira concreta sem obrigar uma única implementação válida, faça isso. Por exemplo, se Struct estiver selecionado, pode ser apropriado exigir o armazenamento de informações de cada item por meio de uma estrutura de dados.
+
+18. Não obrigue nomes específicos de variáveis ou funções, a menos que isso seja necessário para o problema.
+
+19. Não exija uma técnica específica quando existirem várias implementações corretas que atendam ao objetivo.
+
+20. Não forneça código.
+
+21. Não forneça solução.
+
+22. Não forneça dicas de implementação.
+
+23. Não explique como resolver.
+
+24. Não faça introduções ou despedidas.
+
+25. Seja direto, claro e objetivo.
+
+======================================================
+VALIDAÇÃO INTERNA ANTES DE RESPONDER
+======================================================
+
+Antes de gerar a resposta final, verifique internamente:
+
+- Todos os conteúdos obrigatórios possuem uma função relevante no desafio?
+- Existe algum conteúdo incluído apenas para cumprir a lista?
+- Os requisitos permitem verificar objetivamente se a solução está correta?
+- A entrada e a saída são compatíveis com os requisitos?
+- O desafio é realmente adequado à dificuldade informada?
+- O problema continua coerente e natural com todos os conteúdos selecionados?
+
+Se algum conteúdo estiver artificial ou superficial, reformule o desafio antes de responder.
+
+======================================================
+FORMATO DA RESPOSTA
+======================================================
+
+Use EXATAMENTE este formato:
+
+Título:
+[Nome do desafio]
+
+Descrição:
+[Descrição clara e contextualizada do problema]
+
+Requisitos:
+[Lista objetiva e verificável do que o programa deve fazer. Os requisitos devem deixar claro onde os conteúdos obrigatórios são necessários, mas sem fornecer a solução.]
+
+Entrada:
+[Informações que o usuário deverá informar, incluindo quantidades, dados e restrições relevantes.]
+
+Saída:
+[Informações que o programa deverá exibir e como os resultados devem ser apresentados.]
+
+Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
 `;
 
         const resposta = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -134,26 +232,106 @@ Retorne somente um JSON válido no seguinte formato:
         const conteudo =
             resultado?.choices?.[0]?.message?.content || "";
 
-        let desafio;
-
-        try {
-            desafio = JSON.parse(conteudo);
-        } catch {
-            const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
-
-            if (jsonMatch) {
-                desafio = JSON.parse(jsonMatch[0]);
-            } else {
-                desafio = {
-                    resposta: conteudo
-                };
-            }
+        if (!conteudo) {
+            return res.status(500).json({
+                status: "erro",
+                mensagem: "A IA não retornou conteúdo."
+            });
         }
+
+        /*
+         * A IA agora retorna texto no formato solicitado pelo prompt.
+         * Aqui apenas separamos as seções para manter compatibilidade
+         * com o formato que o frontend atual já utiliza.
+         */
+
+        const extrairSecao = (nome, proximo, texto) => {
+            const inicio = texto.indexOf(nome);
+
+            if (inicio === -1) {
+                return "";
+            }
+
+            const inicioConteudo = inicio + nome.length;
+
+            const fim = proximo
+                ? texto.indexOf(proximo, inicioConteudo)
+                : texto.length;
+
+            return texto
+                .slice(
+                    inicioConteudo,
+                    fim === -1 ? texto.length : fim
+                )
+                .trim();
+        };
+
+        const titulo = extrairSecao(
+            "Título:",
+            "Descrição:",
+            conteudo
+        );
+
+        const descricao = extrairSecao(
+            "Descrição:",
+            "Requisitos:",
+            conteudo
+        );
+
+        const requisitosTexto = extrairSecao(
+            "Requisitos:",
+            "Entrada:",
+            conteudo
+        );
+
+        const entrada = extrairSecao(
+            "Entrada:",
+            "Saída:",
+            conteudo
+        );
+
+        const saida = extrairSecao(
+            "Saída:",
+            null,
+            conteudo
+        );
+
+        const requisitos = requisitosTexto
+            .split(/\r?\n/)
+            .map(linha =>
+                linha
+                    .replace(
+                        /^\s*(?:[-*•]|\d+[.)])\s*/,
+                        ""
+                    )
+                    .trim()
+            )
+            .filter(Boolean);
+
+        const desafio = {
+            titulo:
+                titulo || "Desafio de Programação",
+
+            descricao,
+
+            requisitos,
+
+            entrada,
+
+            saida,
+
+            exemploEntrada: "",
+
+            exemploSaida: "",
+
+            restricoes: ""
+        };
 
         res.json({
             status: "ok",
             desafio
         });
+
     } catch (erro) {
         console.error("Erro ao gerar desafio:", erro);
 
@@ -163,6 +341,7 @@ Retorne somente um JSON válido no seguinte formato:
         });
     }
 });
+
 
 app.post("/analisar-codigo", async (req, res) => {
     try {
@@ -354,6 +533,7 @@ Retorne somente um JSON válido neste formato:
             status: "ok",
             analise
         });
+
     } catch (erro) {
         console.error("Erro ao analisar código:", erro);
 
