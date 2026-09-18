@@ -16,7 +16,7 @@ const GROQ_MODEL = "openai/gpt-oss-120b";
 app.get("/", (req, res) => {
     res.json({
         status: "online",
-        versao: "0.95.10",
+        versao: "0.95.11",
         mensagem: "Backend dos Desafios de Programação"
     });
 });
@@ -30,25 +30,22 @@ app.get("/testar-ia", async (req, res) => {
             });
         }
 
-        const resposta = await fetch(
-            "https://openrouter.ai/api/v1/chat/completions",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: OPENROUTER_MODEL,
-                    messages: [
-                        {
-                            role: "user",
-                            content: "Responda apenas: IA funcionando."
-                        }
-                    ]
-                })
-            }
-        );
+        const resposta = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: OPENROUTER_MODEL,
+                messages: [
+                    {
+                        role: "user",
+                        content: "Responda apenas: IA funcionando."
+                    }
+                ]
+            })
+        });
 
         const resultado = await resposta.json();
 
@@ -108,25 +105,22 @@ Retorne somente um JSON válido no seguinte formato:
 }
 `;
 
-        const resposta = await fetch(
-            "https://openrouter.ai/api/v1/chat/completions",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: OPENROUTER_MODEL,
-                    messages: [
-                        {
-                            role: "user",
-                            content: prompt
-                        }
-                    ]
-                })
-            }
-        );
+        const resposta = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: OPENROUTER_MODEL,
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ]
+            })
+        });
 
         const resultado = await resposta.json();
 
@@ -172,12 +166,7 @@ Retorne somente um JSON válido no seguinte formato:
 
 app.post("/analisar-codigo", async (req, res) => {
     try {
-        const {
-            codigo,
-            desafio,
-            requisitos,
-            linguagem
-        } = req.body || {};
+        const { codigo, desafio, requisitos, linguagem } = req.body || {};
 
         if (!codigo) {
             return res.status(400).json({
@@ -195,26 +184,10 @@ LINGUAGEM:
 ${linguagem || "C"}
 
 DESAFIO:
-${
-    typeof desafio === "object"
-        ? JSON.stringify(desafio, null, 2)
-        : (desafio || "Não informado")
-}
+${typeof desafio === "object" ? JSON.stringify(desafio, null, 2) : (desafio || "Não informado")}
 
 REQUISITOS:
-${
-    Array.isArray(requisitos)
-        ? requisitos.join("\n")
-        : (
-            requisitos ||
-            (
-                desafio &&
-                Array.isArray(desafio.requisitos)
-                    ? desafio.requisitos.join("\n")
-                    : "Não informado"
-            )
-        )
-}
+${Array.isArray(requisitos) ? requisitos.join("\n") : (requisitos || (desafio && Array.isArray(desafio.requisitos) ? desafio.requisitos.join("\n") : "Não informado"))}
 
 CÓDIGO DO ALUNO:
 \`\`\`
@@ -222,7 +195,6 @@ ${codigo}
 \`\`\`
 
 Avalie:
-
 1. Se o código resolve o problema proposto.
 2. Se os requisitos foram atendidos.
 3. Possíveis erros lógicos.
