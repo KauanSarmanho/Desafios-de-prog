@@ -1,139 +1,397 @@
-async function verificarCodigo() {
-    if (analiseConclusaoEmAndamento || !desafioAtual) return;
+const express = require("express");
+const cors = require("cors");
 
-    const codigo = editorCodigo.value.trim();
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-    const terminal = document.getElementById("terminalSaida");
-    const statusTexto = document.getElementById("statusTexto");
-    const statusDot = document.getElementById("statusDot");
+app.use(cors());
+app.use(express.json({ limit: "2mb" }));
 
-    if (!codigo) {
-        terminal.innerHTML = `
-            <div class="verificacao-requisito requisito-nao-atendido">
-                ✗ Nenhum código informado
-            </div>
-        `;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
-        statusTexto.textContent = "Erro";
-        statusDot.className = "status-dot";
+const OPENROUTER_MODEL = "openrouter/free";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
-        bloquearConclusaoDesafio();
-        return;
-    }
+app.get("/", (req, res) => {
+    res.json({
+        status: "online",
+        versao: "0.95.10",
+        mensagem: "Backend dos Desafios de Programação"
+    });
+});
 
-    analiseConclusaoEmAndamento = true;
-
-    btnVerificarCodigo.disabled = true;
-    btnVerificarCodigo.textContent = "⏳ VERIFICANDO...";
-
-    bloquearConclusaoDesafio();
-
-    statusTexto.textContent = "Verificando...";
-    statusDot.className = "status-dot compilando";
-
-    terminal.innerHTML = "";
-
-    const titulo = document.createElement("div");
-    titulo.className = "verificacao-linha";
-    titulo.textContent = "> Verificação básica";
-    terminal.appendChild(titulo);
-
+app.get("/testar-ia", async (req, res) => {
     try {
-        const resultado = verificarRequisitosBasicos(codigo);
-
-        const requisitos = resultado.requisitos || [];
-
-        if (requisitos.length === 0) {
-            const aviso = document.createElement("div");
-            aviso.className = "verificacao-linha";
-            aviso.textContent = "> Nenhum requisito específico encontrado para verificação básica.";
-            terminal.appendChild(aviso);
-        } else {
-            const tituloRequisitos = document.createElement("div");
-            tituloRequisitos.className = "verificacao-linha";
-            tituloRequisitos.textContent = "> Verificação dos requisitos";
-            terminal.appendChild(tituloRequisitos);
-
-            requisitos.forEach(item => {
-                const linha = document.createElement("div");
-
-                linha.className =
-                    "verificacao-requisito " +
-                    (item.atendido
-                        ? "requisito-atendido"
-                        : "requisito-nao-atendido");
-
-                linha.textContent =
-                    (item.atendido ? "✓ " : "✗ ") +
-                    item.descricao;
-
-                terminal.appendChild(linha);
+        if (!OPENROUTER_API_KEY) {
+            return res.status(500).json({
+                status: "erro",
+                mensagem: "OPENROUTER_API_KEY não configurada."
             });
         }
 
-        const separador = document.createElement("div");
-        separador.className = "verificacao-linha";
-        separador.textContent = "";
-        terminal.appendChild(separador);
+        const resposta = await fetch(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: OPENROUTER_MODEL,
+                    messages: [
+                        {
+                            role: "user",
+                            content: "Responda apenas: IA funcionando."
+                        }
+                    ]
+                })
+            }
+        );
 
-        if (resultado.passou) {
-            const sucesso = document.createElement("div");
-            sucesso.className = "verificacao-requisito requisito-atendido";
-            sucesso.textContent = "✓ Verificação básica aprovada.";
-            terminal.appendChild(sucesso);
+        const resultado = await resposta.json();
 
-            const explicacao = document.createElement("div");
-            explicacao.className = "verificacao-linha";
-            explicacao.textContent =
-                "> Todos os requisitos básicos identificáveis foram atendidos.";
-            terminal.appendChild(explicacao);
-
-            statusTexto.textContent = "Verificado";
-            statusDot.className = "status-dot";
-
-            liberarConclusaoDesafio();
-
-        } else {
-            const falha = document.createElement("div");
-            falha.className = "verificacao-requisito requisito-nao-atendido";
-            falha.textContent = "✗ Verificação básica reprovada.";
-            terminal.appendChild(falha);
-
-            const explicacao = document.createElement("div");
-            explicacao.className = "verificacao-linha";
-            explicacao.textContent =
-                "> Corrija os requisitos indicados e verifique novamente.";
-            terminal.appendChild(explicacao);
-
-            statusTexto.textContent = "Reprovado";
-            statusDot.className = "status-dot";
-
-            bloquearConclusaoDesafio();
+        if (!resposta.ok) {
+            return res.status(resposta.status).json({
+                status: "erro",
+                resultado
+            });
         }
 
+        res.json({
+            status: "ok",
+            resultado
+        });
     } catch (erro) {
-        console.error("Erro na verificação básica:", erro);
+        console.error("Erro ao testar IA:", erro);
 
-        terminal.innerHTML = "";
-
-        const linhaErro = document.createElement("div");
-        linhaErro.className =
-            "verificacao-requisito requisito-nao-atendido";
-
-        linhaErro.textContent =
-            "✗ Erro na verificação básica: " + erro.message;
-
-        terminal.appendChild(linhaErro);
-
-        statusTexto.textContent = "Erro";
-        statusDot.className = "status-dot";
-
-        bloquearConclusaoDesafio();
-
-    } finally {
-        analiseConclusaoEmAndamento = false;
-
-        btnVerificarCodigo.disabled = false;
-        btnVerificarCodigo.textContent = "✓ VERIFICAR CÓDIGO";
+        res.status(500).json({
+            status: "erro",
+            mensagem: erro.message
+        });
     }
+});
+
+app.post("/gerar-desafio", async (req, res) => {
+    try {
+        const {
+            tema,
+            dificuldade,
+            linguagem
+        } = req.body;
+
+        if (!OPENROUTER_API_KEY) {
+            return res.status(500).json({
+                status: "erro",
+                mensagem: "OPENROUTER_API_KEY não configurada."
+            });
+        }
+
+        const prompt = `
+Crie um desafio de programação.
+
+Tema: ${tema || "programação"}
+Dificuldade: ${dificuldade || "iniciante"}
+Linguagem: ${linguagem || "C"}
+
+Retorne somente um JSON válido no seguinte formato:
+
+{
+  "titulo": "Título do desafio",
+  "descricao": "Descrição detalhada do problema",
+  "entrada": "Descrição da entrada",
+  "saida": "Descrição da saída",
+  "exemploEntrada": "Exemplo de entrada",
+  "exemploSaida": "Exemplo de saída",
+  "restricoes": "Restrições do problema"
 }
+`;
+
+        const resposta = await fetch(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: OPENROUTER_MODEL,
+                    messages: [
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ]
+                })
+            }
+        );
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+            return res.status(resposta.status).json({
+                status: "erro",
+                mensagem: resultado
+            });
+        }
+
+        const conteudo =
+            resultado?.choices?.[0]?.message?.content || "";
+
+        let desafio;
+
+        try {
+            desafio = JSON.parse(conteudo);
+        } catch {
+            const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
+
+            if (jsonMatch) {
+                desafio = JSON.parse(jsonMatch[0]);
+            } else {
+                desafio = {
+                    resposta: conteudo
+                };
+            }
+        }
+
+        res.json({
+            status: "ok",
+            desafio
+        });
+    } catch (erro) {
+        console.error("Erro ao gerar desafio:", erro);
+
+        res.status(500).json({
+            status: "erro",
+            mensagem: erro.message
+        });
+    }
+});
+
+app.post("/analisar-codigo", async (req, res) => {
+    try {
+        const {
+            codigo,
+            desafio,
+            requisitos,
+            linguagem
+        } = req.body || {};
+
+        if (!codigo) {
+            return res.status(400).json({
+                status: "erro",
+                mensagem: "Código não informado."
+            });
+        }
+
+        const prompt = `
+Você é um avaliador de código para uma plataforma educacional.
+
+Analise o código enviado pelo aluno levando em consideração o desafio e os requisitos.
+
+LINGUAGEM:
+${linguagem || "C"}
+
+DESAFIO:
+${
+    typeof desafio === "object"
+        ? JSON.stringify(desafio, null, 2)
+        : (desafio || "Não informado")
+}
+
+REQUISITOS:
+${
+    Array.isArray(requisitos)
+        ? requisitos.join("\n")
+        : (
+            requisitos ||
+            (
+                desafio &&
+                Array.isArray(desafio.requisitos)
+                    ? desafio.requisitos.join("\n")
+                    : "Não informado"
+            )
+        )
+}
+
+CÓDIGO DO ALUNO:
+\`\`\`
+${codigo}
+\`\`\`
+
+Avalie:
+
+1. Se o código resolve o problema proposto.
+2. Se os requisitos foram atendidos.
+3. Possíveis erros lógicos.
+4. Possíveis problemas de compilação ou execução.
+5. Qualidade e clareza do código.
+6. Uma explicação objetiva para o aluno.
+
+Não altere o código do aluno.
+
+Retorne somente um JSON válido neste formato:
+
+{
+  "aprovado": true,
+  "nota": 0,
+  "resumo": "Resumo da análise",
+  "requisitos": [
+    {
+      "descricao": "Descrição do requisito",
+      "atendido": true,
+      "justificativa": "Explicação objetiva"
+    }
+  ],
+  "pontosPositivos": [
+    "Ponto positivo"
+  ],
+  "problemas": [
+    "Problema encontrado"
+  ],
+  "sugestoes": [
+    "Sugestão"
+  ],
+  "explicacao": "Explicação detalhada"
+}
+`;
+
+        let resultadoIA;
+
+        // Primeiro tenta OpenRouter
+        if (OPENROUTER_API_KEY) {
+            try {
+                const resposta = await fetch(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: OPENROUTER_MODEL,
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: prompt
+                                }
+                            ]
+                        })
+                    }
+                );
+
+                const resultado = await resposta.json();
+
+                if (resposta.ok) {
+                    resultadoIA =
+                        resultado?.choices?.[0]?.message?.content;
+                }
+            } catch (erro) {
+                console.error(
+                    "Erro no OpenRouter:",
+                    erro.message
+                );
+            }
+        }
+
+        // Fallback para Groq
+        if (!resultadoIA && GROQ_API_KEY) {
+            try {
+                const resposta = await fetch(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${GROQ_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: GROQ_MODEL,
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: prompt
+                                }
+                            ]
+                        })
+                    }
+                );
+
+                const resultado = await resposta.json();
+
+                if (resposta.ok) {
+                    resultadoIA =
+                        resultado?.choices?.[0]?.message?.content;
+                }
+            } catch (erro) {
+                console.error(
+                    "Erro no Groq:",
+                    erro.message
+                );
+            }
+        }
+
+        if (!resultadoIA) {
+            return res.status(500).json({
+                status: "erro",
+                mensagem: "Nenhum serviço de IA respondeu."
+            });
+        }
+
+        let analise;
+
+        try {
+            analise = JSON.parse(resultadoIA);
+        } catch {
+            const jsonMatch =
+                resultadoIA.match(/\{[\s\S]*\}/);
+
+            if (jsonMatch) {
+                try {
+                    analise = JSON.parse(jsonMatch[0]);
+                } catch {
+                    analise = {
+                        aprovado: false,
+                        nota: 0,
+                        resumo: resultadoIA,
+                        requisitos: [],
+                        pontosPositivos: [],
+                        problemas: [],
+                        sugestoes: [],
+                        explicacao: resultadoIA
+                    };
+                }
+            } else {
+                analise = {
+                    aprovado: false,
+                    nota: 0,
+                    resumo: resultadoIA,
+                    requisitos: [],
+                    pontosPositivos: [],
+                    problemas: [],
+                    sugestoes: [],
+                    explicacao: resultadoIA
+                };
+            }
+        }
+
+        res.json({
+            status: "ok",
+            analise
+        });
+    } catch (erro) {
+        console.error("Erro ao analisar código:", erro);
+
+        res.status(500).json({
+            status: "erro",
+            mensagem: erro.message
+        });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
