@@ -95,20 +95,16 @@ app.post("/gerar-desafio", async (req, res) => {
             ? conteudos
             : [];
 
-        const conteudosTexto = conteudosLista.length > 0
-            ? conteudosLista.join(", ")
-            : (tema || "programação");
-
         const prompt = `
 Você é um gerador especializado de desafios de programação em linguagem C.
 
 Sua tarefa é criar UM único desafio de programação que seja interessante, coerente, prático e compatível com o nível de dificuldade informado.
 
 Dificuldade:
-${dificuldade || "iniciante"}
+${dificuldade}
 
 Conteúdos obrigatórios:
-${conteudosTexto}
+${conteudosLista.join(", ")}
 
 ======================================================
 REGRAS FUNDAMENTAIS
@@ -240,90 +236,161 @@ Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
         }
 
         /*
-         * A IA agora retorna texto no formato solicitado pelo prompt.
-         * Aqui apenas separamos as seções para manter compatibilidade
-         * com o formato que o frontend atual já utiliza.
+         * Processa a resposta da IA mantendo as cinco seções:
+         *
+         * Título:
+         * Descrição:
+         * Requisitos:
+         * Entrada:
+         * Saída:
+         *
+         * O parser aceita pequenas variações de Markdown,
+         * como:
+         *
+         * **Título:**
+         * ### Título:
+         * Título:
          */
 
-        const extrairSecao = (nome, proximo, texto) => {
-            const inicio = texto.indexOf(nome);
-
-            if (inicio === -1) {
-                return "";
-            }
-
-            const inicioConteudo = inicio + nome.length;
-
-            const fim = proximo
-                ? texto.indexOf(proximo, inicioConteudo)
-                : texto.length;
-
+        const normalizarCabecalho = (texto) => {
             return texto
-                .slice(
-                    inicioConteudo,
-                    fim === -1 ? texto.length : fim
-                )
+                .replace(/\r\n/g, "\n")
+                .replace(/\r/g, "\n")
+                .replace(/^\s*```(?:text|markdown)?\s*/i, "")
+                .replace(/\s*```\s*$/i, "")
                 .trim();
         };
 
-        const titulo = extrairSecao(
-            "Título:",
-            "Descrição:",
-            conteudo
-        );
+        const textoNormalizado = normalizarCabecalho(conteudo);
 
-        const descricao = extrairSecao(
-            "Descrição:",
-            "Requisitos:",
-            conteudo
-        );
+        const encontrarSecao = (nomeSecao, inicioBusca = 0) => {
+            const escapedNome = nomeSecao
+                .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-        const requisitosTexto = extrairSecao(
-            "Requisitos:",
-            "Entrada:",
-            conteudo
-        );
+            const regex = new RegExp(
+                `(?:^|\\n)\\s*(?:#{1,6}\\s*)?(?:\\*{1,3}\\s*)?${escapedNome}\\s*:\\s*(?:\\*{1,3}\\s*)?`,
+                "i"
+            );
 
-        const entrada = extrairSecao(
-            "Entrada:",
-            "Saída:",
-            conteudo
-        );
+            const trecho = textoNormalizado.slice(inicioBusca);
+            const match = regex.exec(trecho);
 
-        const saida = extrairSecao(
-            "Saída:",
-            null,
-            conteudo
-        );
+            if (!match) {
+                return null;
+            }
+
+            return {
+                inicio: inicioBusca + match.index,
+                inicioConteudo: inicioBusca + match.index + match[0].length
+            };
+        };
+
+        const secoesOrdem = [
+            "Título",
+            "Descrição",
+            "Requisitos",
+            "Entrada",
+            "Saída"
+        ];
+
+        const secoes = {};
+
+        let posicaoAtual = 0;
+
+        for (let i = 0; i < secoesOrdem.length; i++) {
+            const nome = secoesOrdem[i];
+
+            const encontrada = encontrarSecao(
+                nome,
+                posicaoAtual
+            );
+
+            if (!encontrada) {
+                continue;
+            }
+
+            let fim = textoNormalizado.length;
+
+            for (let j = i + 1; j < secoesOrdem.length; j++) {
+                const proxima = encontrarSecao(
+                    secoesOrdem[j],
+                    encontrada.inicioConteudo
+                );
+
+                if (proxima) {
+                    fim = proxima.inicio;
+                    break;
+                }
+            }
+
+            secoes[nome.toLowerCase()] = textoNormalizado
+                .slice(encontrada.inicioConteudo, fim)
+                .trim();
+
+            posicaoAtual = encontrada.inicioConteudo;
+        }
+
+        /*
+         * Fallback adicional para respostas que usem os cabeçalhos
+         * sem Markdown, preservando a compatibilidade com versões
+         * anteriores.
+         */
+        if (!secoes["título"] && !secoes["descrição"]) {
+            const regexFallback =
+                /(?:^|\n)\s*(?:#{1,6}\s*)?(?:\*{1,3}\s*)?(Título|Titulo|Descrição|Descricao|Requisitos|Entrada|Saída|Saida)\s*:\s*(?:\*{1,3}\s*)?([\s\S]*?)(?=\n\s*(?:#{1,6}\s*)?(?:\*{1,3}\s*)?(?:Título|Titulo|Descrição|Descricao|Requisitos|Entrada|Saída|Saida)\s*:|$)/gi;
+
+            let matchFallback;
+
+            while ((matchFallback = regexFallback.exec(textoNormalizado)) !== null) {
+                const nome = matchFallback[1]
+                    .toLowerCase()
+                    .trim();
+
+                secoes[nome] = matchFallback[2].trim();
+            }
+        }
+
+        const titulo =
+            secoes["título"] ||
+            secoes["titulo"] ||
+            "Desafio de Programação";
+
+        const descricao =
+            secoes["descrição"] ||
+            secoes["descricao"] ||
+            "";
+
+        const requisitosTexto =
+            secoes["requisitos"] ||
+            "";
+
+        const entrada =
+            secoes["entrada"] ||
+            "";
+
+        const saida =
+            secoes["saída"] ||
+            secoes["saida"] ||
+            "";
 
         const requisitos = requisitosTexto
             .split(/\r?\n/)
             .map(linha =>
                 linha
-                    .replace(
-                        /^\s*(?:[-*•]|\d+[.)])\s*/,
-                        ""
-                    )
+                    .replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "")
+                    .replace(/^\s*\*{1,3}\s*/, "")
                     .trim()
             )
             .filter(Boolean);
 
         const desafio = {
-            titulo:
-                titulo || "Desafio de Programação",
-
+            titulo,
             descricao,
-
             requisitos,
-
             entrada,
-
             saida,
-
             exemploEntrada: "",
-
             exemploSaida: "",
-
             restricoes: ""
         };
 
