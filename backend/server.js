@@ -16,7 +16,7 @@ const GROQ_MODEL = "openai/gpt-oss-120b";
 app.get("/", (req, res) => {
     res.json({
         status: "online",
-        versao: "0.95.11",
+        versao: "0.95.21",
         mensagem: "Backend dos Desafios de Programação"
     });
 });
@@ -160,6 +160,22 @@ REGRAS FUNDAMENTAIS
 
 25. Seja direto, claro e objetivo.
 
+26. A seção Entrada deve descrever de forma clara quais dados o programa precisa receber para resolver o problema, mas NÃO deve impor detalhes desnecessariamente rígidos de formatação.
+
+27. A seção Saída deve descrever de forma clara quais informações o programa precisa apresentar, mas NÃO deve impor detalhes desnecessariamente rígidos de formatação.
+
+28. Não determine posições exatas de linhas, separadores, quantidade específica de linhas, textos literais, casas decimais ou formatos específicos de impressão, a menos que isso seja realmente necessário para definir o problema ou seja uma exigência funcional relevante.
+
+29. Não transforme detalhes de implementação em requisitos de Entrada ou Saída.
+
+30. Os requisitos devem avaliar principalmente o comportamento e as funcionalidades que o programa precisa realizar, permitindo diferentes implementações corretas.
+
+31. Quando houver mais de uma forma razoável de receber ou apresentar os dados, descreva o que deve ser informado ou apresentado sem obrigar uma única organização da entrada ou saída.
+
+32. Somente estabeleça uma formatação exata quando ela for necessária para tornar o problema objetivamente verificável ou quando a própria situação proposta exigir essa formatação.
+
+33. Não faça com que a especificação da Entrada ou da Saída exija uma solução específica do aluno.
+
 ======================================================
 VALIDAÇÃO INTERNA ANTES DE RESPONDER
 ======================================================
@@ -170,10 +186,16 @@ Antes de gerar a resposta final, verifique internamente:
 - Existe algum conteúdo incluído apenas para cumprir a lista?
 - Os requisitos permitem verificar objetivamente se a solução está correta?
 - A entrada e a saída são compatíveis com os requisitos?
+- A entrada está especificada apenas no nível necessário para o aluno saber quais dados deve fornecer?
+- A saída está especificada apenas no nível necessário para o aluno saber quais informações deve apresentar?
+- Existe alguma regra de formatação que não seja realmente necessária?
+- Algum requisito está impondo uma implementação específica sem necessidade?
 - O desafio é realmente adequado à dificuldade informada?
 - O problema continua coerente e natural com todos os conteúdos selecionados?
 
 Se algum conteúdo estiver artificial ou superficial, reformule o desafio antes de responder.
+
+Se a Entrada ou a Saída estiver excessivamente específica sem necessidade, simplifique sua descrição mantendo todas as informações necessárias para resolver e verificar o desafio.
 
 ======================================================
 FORMATO DA RESPOSTA
@@ -191,10 +213,10 @@ Requisitos:
 [Lista objetiva e verificável do que o programa deve fazer. Os requisitos devem deixar claro onde os conteúdos obrigatórios são necessários, mas sem fornecer a solução.]
 
 Entrada:
-[Informações que o usuário deverá informar, incluindo quantidades, dados e restrições relevantes.]
+[Informações que o usuário deverá informar, incluindo quantidades, dados e restrições relevantes, sem impor detalhes desnecessários de formatação.]
 
 Saída:
-[Informações que o programa deverá exibir e como os resultados devem ser apresentados.]
+[Informações que o programa deverá exibir e como os resultados devem ser apresentados, sem impor detalhes desnecessários de formatação.]
 
 Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
 `;
@@ -234,23 +256,6 @@ Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
                 mensagem: "A IA não retornou conteúdo."
             });
         }
-
-        /*
-         * Processa a resposta da IA mantendo as cinco seções:
-         *
-         * Título:
-         * Descrição:
-         * Requisitos:
-         * Entrada:
-         * Saída:
-         *
-         * O parser aceita pequenas variações de Markdown,
-         * como:
-         *
-         * **Título:**
-         * ### Título:
-         * Título:
-         */
 
         const normalizarCabecalho = (texto) => {
             return texto
@@ -330,11 +335,6 @@ Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
             posicaoAtual = encontrada.inicioConteudo;
         }
 
-        /*
-         * Fallback adicional para respostas que usem os cabeçalhos
-         * sem Markdown, preservando a compatibilidade com versões
-         * anteriores.
-         */
         if (!secoes["título"] && !secoes["descrição"]) {
             const regexFallback =
                 /(?:^|\n)\s*(?:#{1,6}\s*)?(?:\*{1,3}\s*)?(Título|Titulo|Descrição|Descricao|Requisitos|Entrada|Saída|Saida)\s*:\s*(?:\*{1,3}\s*)?([\s\S]*?)(?=\n\s*(?:#{1,6}\s*)?(?:\*{1,3}\s*)?(?:Título|Titulo|Descrição|Descricao|Requisitos|Entrada|Saída|Saida)\s*:|$)/gi;
@@ -410,6 +410,10 @@ Não escreva nada antes de "Título:" e nada depois da seção "Saída:".
 });
 
 
+/* ============================================================
+   ANALISAR CÓDIGO
+   ============================================================ */
+
 app.post("/analisar-codigo", async (req, res) => {
     try {
         const { codigo, desafio, requisitos, linguagem } = req.body || {};
@@ -430,10 +434,22 @@ LINGUAGEM:
 ${linguagem || "C"}
 
 DESAFIO:
-${typeof desafio === "object" ? JSON.stringify(desafio, null, 2) : (desafio || "Não informado")}
+${typeof desafio === "object"
+    ? JSON.stringify(desafio, null, 2)
+    : (desafio || "Não informado")}
 
 REQUISITOS:
-${Array.isArray(requisitos) ? requisitos.join("\n") : (requisitos || (desafio && Array.isArray(desafio.requisitos) ? desafio.requisitos.join("\n") : "Não informado"))}
+${Array.isArray(requisitos)
+    ? requisitos.join("\n")
+    : (
+        requisitos ||
+        (
+            desafio &&
+            Array.isArray(desafio.requisitos)
+                ? desafio.requisitos.join("\n")
+                : "Não informado"
+        )
+    )}
 
 CÓDIGO DO ALUNO:
 \`\`\`
@@ -478,7 +494,6 @@ Retorne somente um JSON válido neste formato:
 
         let resultadoIA;
 
-        // Primeiro tenta OpenRouter
         if (OPENROUTER_API_KEY) {
             try {
                 const resposta = await fetch(
@@ -515,7 +530,6 @@ Retorne somente um JSON válido neste formato:
             }
         }
 
-        // Fallback para Groq
         if (!resultadoIA && GROQ_API_KEY) {
             try {
                 const resposta = await fetch(
@@ -610,6 +624,7 @@ Retorne somente um JSON válido neste formato:
         });
     }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
